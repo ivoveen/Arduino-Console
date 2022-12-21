@@ -12,6 +12,7 @@
 RGBmatrixPanel matrix(A, B, C, CLK, LAT, OE, false);
 
 
+
 //---------------------------
 //input value variables
 //---------------------------
@@ -28,12 +29,15 @@ int pausePressed = 0;
 int gameState = 0; 
 int waitCounter = 0; //this counter can be re-used by every different game state.
 int noSpam = 0;
+int noSpam2 = 0;
+int noSpam3 = 0;
+int waitCounter2 = 0;
 //---------------------------
 //main menu variables
 //---------------------------
-const int SCROLLSPEED = 1500;
+const int SCROLLSPEED = 1200;
 const int GAMESPEED = 800;
-const char *GAMES[5] = {"Snake", "Ducks", "Catch", "Shoot"};
+const char *GAMES[5] = {"Snake", "Dino", "Catch", "Shoot"};
 int gameSelected = 0;
 
 
@@ -57,6 +61,10 @@ void setup() {
   randomSeed(analogRead(0));
 
   startupAnimation();  
+   //render the main menu  
+  mainMenuSetup();
+  mainMenuRender();
+  gameState = 0;
 }
 
 
@@ -96,8 +104,7 @@ void startupAnimation(){
     delay(25);
   }
 
-  //render the main menu  
-  mainMenuRender();
+ 
 }
 
 
@@ -217,6 +224,7 @@ void loop() {
   }
   if (pausePressed == 1 && noSpam != 1){
     gameState = 0;
+    mainMenuSetup();
     mainMenuRender();
     noSpam = 1;
   }
@@ -231,6 +239,18 @@ void loop() {
    case 2:
     snakeLose();
     break;
+   case 3:
+    // reserved for whack
+    break;
+   case 4:
+    // reserved for whack lose / score / win idk
+    break;
+   case 5:
+    dinoRunRun();
+    break;
+   case 6:
+    dinoRunLose();
+    break;
   }
 }
 
@@ -239,10 +259,14 @@ void loop() {
 // MAIN MENU CODE
 // -------------------------------------------------------------------------------
 
+void mainMenuSetup(){
+  waitCounter = 0;
+  noSpam = 0;
+}
+
 void mainMenuRun(){
   //check if a game was selected this tick
   if(actionPressed == 1){
-    Serial.print("BUTTON IS PRESSED");
     switch (gameSelected){
       case 0:
       gameState = 1;   
@@ -250,7 +274,8 @@ void mainMenuRun(){
       
       break;
       case 1:
-    
+      gameState = 5;   
+      dinoRunSetup();
       break;
       case 2:
 
@@ -267,12 +292,21 @@ void mainMenuRun(){
     
   }
 
+
   //if the joystick is moved up or down and the waitcounter has waited long enough:
-  if(joystickDirection !=0  && joystickDirection !=2  && joystickDirection !=4  &&  waitCounter >= SCROLLSPEED){ 
+  if(joystickDirection !=0  && joystickDirection !=2  && joystickDirection !=4 && noSpam2 == 0){ 
+    noSpam2 = 1;
     mainMenuRender();
-    waitCounter = 0;
   }
-  waitCounter++;
+
+  if (noSpam2 == 1){
+    waitCounter++;
+    if(waitCounter == SCROLLSPEED){
+      noSpam2 = 0;
+      waitCounter = 0;
+    }    
+  }
+  
 
 }
 
@@ -306,7 +340,7 @@ void mainMenuRender(){
 // -------------------------------------------------------------------------------
 const int SNAKEDISPX = 15;
 const int SNAKEDISPY = 7;
-int snakeDisp[SNAKEDISPX+1][SNAKEDISPY+1];
+byte snakeDisp[SNAKEDISPX+1][SNAKEDISPY+1];
 int growLonger;
 
 struct snake{
@@ -605,6 +639,529 @@ if(waitCounter == 0){
   if(actionPressed == 1){
     gameState = 0;
   }
+
+
+}
+
+
+//--------------------------------------------------------------------
+//        DINO RUN GAME
+// -------------------------------------------------------------------
+
+const int dinoMaxObstacles = 5;
+const int DINOAIRTIME = 7;
+const int dinoSpeedUpTime = 20;
+const int BIRDHEIGHT = 8;
+const int DINORUNSPEEDSTART = 200;
+
+int dinoYpos = 14;
+int dinoState;
+int dinoRunSpeed;
+int jumpBool;
+int duckBool;
+int dinoScore;
+int dinoLives;
+
+
+struct dinoObstacle{
+  int type; // type refers to the sprite that needs to be rendered, the hitbox it has and if it is ground or air
+  int xPos;
+};
+
+struct dinoObstacle Obstacle;
+
+//set up of dino run
+void dinoRunSetup(){
+  clearScreen();
+  dinoYpos = 14;
+  dinoState = 1;
+  dinoRunSpeed = DINORUNSPEEDSTART;
+  
+  jumpBool = 0;
+  duckBool = 0;
+  
+  waitCounter2 = 0;
+  noSpam3 = 0;
+  noSpam = 1;
+  noSpam2 = 0;
+  
+  dinoScore = 0;
+  dinoLives = 3;
+
+
+  Obstacle.type = 0;
+  Obstacle.xPos = 31;
+
+  spawnObstacle(10);
+
+  //draw sand ground
+   matrix.fillRect(0, 15, 32, 1, matrix.Color888(153, 229, 80));  
+
+        //draw score
+    
+        matrix.fillRect(26, 0, 16, 8, matrix.Color888(0, 0, 0)); 
+        matrix.setTextColor(matrix.Color333(7,0,0));
+        matrix.setCursor(26, 0);
+        matrix.print(dinoLives);
+}
+
+//-------------------------------------
+//the main game loop
+//-----------------------------------
+
+void dinoRunRun(){
+  
+  //handle inputs
+  if(actionPressed == 1 || joystickDirection == 3){
+    
+    //dino is jumping
+    if(jumpBool == 0){ //making sure you cant spam jump in the air
+    
+      jumpBool = 1;      
+    
+      //and remove dino face if it was ducking previously
+      for(int i = 7; i < 9; i++){
+          for(int j = 0; j < 6; j++){
+            matrix.drawPixel(i + 1, dinoYpos - j, matrix.Color333(0, 0, 0));
+          }
+        }
+    }
+    dinoState = 2;
+  }
+  else if(joystickDirection == 1 && dinoState != 2){
+    //dino is ducking
+    duckBool = 1;
+    dinoState = 1;
+  }  else if(dinoState != 2){ 
+    //dino is running
+    dinoState = 1;
+    duckBool = 0;
+  }
+
+  if(waitCounter == dinoRunSpeed){
+    waitCounter = 0;  
+  
+    //move the dino
+    dinoRender();
+
+    //move Obstacles
+    dinoMoveObstacles();
+
+
+    //redraw the life counter
+    dinoUpdateLife();
+  }
+  waitCounter++;
+
+}
+
+//-------------------------------------
+//Dino health
+//-----------------------------------
+
+void dinoUpdateLife(){
+  matrix.fillRect(26, 0, 16, 8, matrix.Color333(0, 0, 0)); 
+  matrix.setTextColor(matrix.Color333(7,0,0));
+  matrix.setCursor(26, 0);
+  matrix.print(dinoLives);  
+}
+
+void dinoHit(){
+  if (noSpam3 == 0){ //
+  dinoLives--;
+  dinoUpdateLife(); 
+  if(dinoLives == 0){
+      waitCounter = -1;
+      gameState = 6;
+      noSpam = 0;
+      if(actionPressed == 1){ // make sure the end screen is not skipped
+        noSpam = 1;
+      }
+  }
+
+  }
+}
+
+//-------------------------------------
+// obstacle code
+//-----------------------------------
+
+
+void spawnObstacle(int extraX){
+  Obstacle.xPos = 29 + extraX + rand()%6;
+  Obstacle.type = rand()%3 + 1;
+}
+
+
+void dinoMoveObstacles(){
+  
+    if (Obstacle.type != 0){
+      
+      /*
+      Serial.print( "type: ");
+      Serial.print( Obstacles[i].type);
+      Serial.print( "i: ");
+      Serial.print(i);
+      Serial.print( "xpos: ");
+      Serial.print( Obstacles[i].xPos);
+      */
+      
+      //this obstacles exists and should be moved
+      Obstacle.xPos = Obstacle.xPos - 1;
+      
+      //check if its offscreen completely, if so spawn a new one
+      if(Obstacle.xPos < -9){
+        spawnObstacle(0);
+
+        dinoScore++;
+        
+        if(dinoRunSpeed - dinoSpeedUpTime > 40){
+          dinoRunSpeed = dinoRunSpeed - dinoSpeedUpTime;          
+        }
+      } else {
+
+
+        renderObstacle(Obstacle.type, Obstacle.xPos);
+      }
+    }
+  
+}
+
+void renderObstacle( int type, int xPos){
+  int tempVal;
+  switch (type) {
+    case 1:
+      //check if the cactus hits the player
+
+      if (xPos <= 7 && xPos + 6  >= 3){ // is the cactus even close to the players x
+        if(dinoYpos > 9){ // did the player jump high enough
+          dinoHit();
+          noSpam3 = 1;
+        }
+      }else{
+        noSpam3 = 0;
+      }
+
+
+    
+      
+
+     matrix.fillRect(xPos+1, 9, 6, 6, matrix.Color333(0, 0, 0));  
+     //matrix.fillRect(xPos, 10, 3, 6, matrix.Color888(26, 122, 26));
+
+      matrix.drawPixel(xPos + 2, 14 - 0, matrix.Color888(106, 190, 48));
+      matrix.drawPixel(xPos + 3, 14 - 0, matrix.Color888(153, 229, 80));
+
+      matrix.drawPixel(xPos + 2, 14 - 1, matrix.Color888(106, 190, 48));
+      matrix.drawPixel(xPos + 3, 14 - 1, matrix.Color888(255,255,255));
+
+      matrix.drawPixel(xPos    , 14 - 2, matrix.Color888(255,255,255));
+      matrix.drawPixel(xPos + 1, 14 - 2, matrix.Color888(106, 190, 48));
+      matrix.drawPixel(xPos + 2, 14 - 2, matrix.Color888(106, 190, 48));
+      matrix.drawPixel(xPos + 3, 14 - 2, matrix.Color888(153, 229, 80));
+      matrix.drawPixel(xPos + 5, 14 - 3, matrix.Color888(255,255,255));
+
+      matrix.drawPixel(xPos    , 14 - 3, matrix.Color888(106, 190, 48));
+      matrix.drawPixel(xPos + 2, 14 - 3, matrix.Color888(255,255,255));
+      matrix.drawPixel(xPos + 3, 14 - 3, matrix.Color888(153, 229, 80));
+      matrix.drawPixel(xPos + 4, 14 - 3, matrix.Color888(153, 229, 80));
+      matrix.drawPixel(xPos + 5, 14 - 3, matrix.Color888(153, 229, 80));
+
+      matrix.drawPixel(xPos + 2, 14 - 4, matrix.Color888(106, 190, 48));
+      matrix.drawPixel(xPos + 3, 14 - 4, matrix.Color888(153, 229, 80));
+      matrix.drawPixel(xPos + 5, 14 - 4, matrix.Color888(153, 229, 80));
+
+      matrix.drawPixel(xPos + 2, 14 - 5, matrix.Color888(153, 229, 80));
+      matrix.drawPixel(xPos + 3, 14 - 5, matrix.Color888(255,255,255));
+
+      break;
+    case 2:
+      if (xPos <= 7 && xPos + 6  >= 3){ // is the cactus even close to the players x
+        if(dinoYpos > 10){ // did the player jump high enough
+          dinoHit();
+          noSpam3 = 1;
+        }
+      }else{
+        noSpam3 = 0;
+      }
+
+    
+     matrix.fillRect(xPos+1, 9, 6, 6, matrix.Color333(0, 0, 0));  
+     //matrix.fillRect(xPos, 10, 3, 6, matrix.Color888(26, 122, 26));
+
+      matrix.drawPixel(xPos + 1, 14 - 0, matrix.Color888(153, 229, 80));
+      matrix.drawPixel(xPos + 2, 14 - 0, matrix.Color888(106, 190, 48));
+      matrix.drawPixel(xPos + 3, 14 - 0, matrix.Color888(153, 229, 80));
+      matrix.drawPixel(xPos + 4, 14 - 0, matrix.Color888(153, 229, 80));
+
+      matrix.drawPixel(xPos    , 14 - 1, matrix.Color888(106, 190, 48));
+      matrix.drawPixel(xPos + 1, 14 - 1, matrix.Color888(153, 229, 80));
+      matrix.drawPixel(xPos + 2, 14 - 1, matrix.Color888(153, 229, 80));
+      matrix.drawPixel(xPos + 3, 14 - 1, matrix.Color888(153, 229, 80));
+      matrix.drawPixel(xPos + 4, 14 - 1, matrix.Color888(106, 190, 48));
+      matrix.drawPixel(xPos + 5, 14 - 1, matrix.Color888(153, 229, 80));
+
+      matrix.drawPixel(xPos + 1, 14 - 2, matrix.Color888(106, 190, 48));
+      matrix.drawPixel(xPos + 2, 14 - 2, matrix.Color888(153, 229, 80));
+      matrix.drawPixel(xPos + 3, 14 - 2, matrix.Color888(215, 123, 186));
+      matrix.drawPixel(xPos + 4, 14 - 2, matrix.Color888(153, 229, 80));
+
+      matrix.drawPixel(xPos + 2, 14 - 3, matrix.Color888(215, 123, 186));
+      matrix.drawPixel(xPos + 3, 14 - 3, matrix.Color888(215, 123, 186));
+      matrix.drawPixel(xPos + 4, 14 - 3, matrix.Color888(215, 123, 186));
+
+      matrix.drawPixel(xPos + 3, 14 - 4, matrix.Color888(215, 123, 186));
+      break;
+
+
+    case 3: //flying thing
+
+      if (xPos <= 7 && xPos + 8  >= 3){ // is the flyer even close to the players x
+        if(duckBool == 1){
+          if(dinoYpos - 5 <= BIRDHEIGHT){ // is the player ducking
+            dinoHit();
+            noSpam3 = 1;
+          }
+        }else{
+          if(dinoYpos - 6 <= BIRDHEIGHT){ // is the player low enough
+            dinoHit();
+            noSpam3 = 1;
+          }
+        }
+
+        
+      }else{
+        noSpam3 = 0;
+      }
+
+      matrix.fillRect(xPos+1, 1, 9, 8, matrix.Color333(0, 0, 0));  
+     //matrix.fillRect(xPos, 10, 3, 6, matrix.Color888(26, 122, 26));
+
+      matrix.drawPixel(xPos + 6, BIRDHEIGHT - 0, matrix.Color888(102, 57, 49));
+      matrix.drawPixel(xPos + 7, BIRDHEIGHT - 0, matrix.Color888(102, 57, 49));
+
+      matrix.drawPixel(xPos + 3, BIRDHEIGHT - 1, matrix.Color888(238, 195, 154));
+      matrix.drawPixel(xPos + 4, BIRDHEIGHT - 1, matrix.Color888(238, 195, 154));
+      matrix.drawPixel(xPos + 5, BIRDHEIGHT - 1, matrix.Color888(238, 195, 154));
+      matrix.drawPixel(xPos + 6, BIRDHEIGHT - 1, matrix.Color888(238, 195, 154));
+      matrix.drawPixel(xPos + 7, BIRDHEIGHT - 1, matrix.Color888(143, 86, 59));
+      matrix.drawPixel(xPos + 8, BIRDHEIGHT - 1, matrix.Color888(143, 86, 59));
+
+      matrix.drawPixel(xPos    , BIRDHEIGHT - 2, matrix.Color888(102, 57, 49));
+      matrix.drawPixel(xPos + 1, BIRDHEIGHT - 2, matrix.Color888(143, 86, 59));
+      matrix.drawPixel(xPos + 2, BIRDHEIGHT - 2, matrix.Color888(143, 86, 59));
+      matrix.drawPixel(xPos + 3, BIRDHEIGHT - 2, matrix.Color888(143, 86, 59));
+      matrix.drawPixel(xPos + 4, BIRDHEIGHT - 2, matrix.Color888(238, 195, 154));
+      matrix.drawPixel(xPos + 5, BIRDHEIGHT - 2, matrix.Color888(238, 195, 154));
+      matrix.drawPixel(xPos + 6, BIRDHEIGHT - 2, matrix.Color888(143, 86, 59));
+      matrix.drawPixel(xPos + 7, BIRDHEIGHT - 2, matrix.Color888(143, 86, 59));
+      matrix.drawPixel(xPos + 8, BIRDHEIGHT - 2, matrix.Color888(143, 86, 59));
+
+      matrix.drawPixel(xPos    , BIRDHEIGHT - 3, matrix.Color888(102, 57, 49));
+      matrix.drawPixel(xPos + 1, BIRDHEIGHT - 3, matrix.Color888(143, 86, 59));
+      matrix.drawPixel(xPos + 2, BIRDHEIGHT - 3, matrix.Color888(102, 57, 49));
+      matrix.drawPixel(xPos + 3, BIRDHEIGHT - 3, matrix.Color888(143, 86, 59));
+      matrix.drawPixel(xPos + 4, BIRDHEIGHT - 3, matrix.Color888(238, 195, 154));
+      matrix.drawPixel(xPos + 5, BIRDHEIGHT - 3, matrix.Color888(238, 195, 154));
+      matrix.drawPixel(xPos + 6, BIRDHEIGHT - 3, matrix.Color888(143, 86, 59));
+
+      matrix.drawPixel(xPos + 1, BIRDHEIGHT - 4, matrix.Color888(143, 86, 59));
+      matrix.drawPixel(xPos + 2, BIRDHEIGHT - 4, matrix.Color888(143, 86, 59));
+      matrix.drawPixel(xPos + 4, BIRDHEIGHT - 4, matrix.Color888(143, 86, 59));
+      matrix.drawPixel(xPos + 5, BIRDHEIGHT - 4, matrix.Color888(238, 195, 154));
+      matrix.drawPixel(xPos + 6, BIRDHEIGHT - 4, matrix.Color888(143, 86, 59));
+
+      matrix.drawPixel(xPos + 4, BIRDHEIGHT - 5, matrix.Color888(143, 86, 59));
+      matrix.drawPixel(xPos + 5, BIRDHEIGHT - 5, matrix.Color888(238, 195, 154));
+      matrix.drawPixel(xPos + 6, BIRDHEIGHT - 5, matrix.Color888(238, 195, 154));
+      matrix.drawPixel(xPos + 7, BIRDHEIGHT - 5, matrix.Color888(143, 86, 59));
+
+      matrix.drawPixel(xPos + 5, BIRDHEIGHT - 6, matrix.Color888(143, 86, 59));
+      matrix.drawPixel(xPos + 6, BIRDHEIGHT - 6, matrix.Color888(238, 195, 154));
+      matrix.drawPixel(xPos + 7, BIRDHEIGHT - 6, matrix.Color888(143, 86, 59));
+      matrix.drawPixel(xPos + 8, BIRDHEIGHT - 6, matrix.Color888(143, 86, 59));
+
+      matrix.drawPixel(xPos + 6, BIRDHEIGHT - 6, matrix.Color888(143, 86, 59));
+      matrix.drawPixel(xPos + 7, BIRDHEIGHT - 6, matrix.Color888(143, 86, 59));
+
+    break;
+ }
+}
+
+//-------------------------------------
+// dino code
+//-----------------------------------
+
+
+
+void dinoRender(){
+  switch (dinoState){
+    case 1:
+      
+
+      drawBasicDinosaurBody();
+
+      if (duckBool == 0){
+        for(int i = 7; i < 9; i++){
+          for(int j = 0; j < 6; j++){
+            matrix.drawPixel(i + 1, dinoYpos - j, matrix.Color333(0, 0, 0));
+          }
+        }
+        
+        matrix.drawPixel(7, dinoYpos -3, matrix.Color333(0, 0, 0));
+
+        drawBasicDinosaurHead(0, 0);
+      } else if  (duckBool == 1){
+        //dino is ducking while running
+        for(int i = 0; i < 7; i++){
+          for(int j = 4; j < 7; j++){
+            matrix.drawPixel(i + 1, dinoYpos - j, matrix.Color333(0, 0, 0));
+          }
+        }
+
+        drawBasicDinosaurHead(2, 1);        
+      }
+      
+     //Dino is running
+      if(noSpam2 == 1){
+       noSpam2--;
+       matrix.drawPixel(3, dinoYpos - 1, matrix.Color888(89, 193, 53));
+       matrix.drawPixel(4, dinoYpos - 1, matrix.Color888(89, 193, 53));
+       matrix.drawPixel(6, dinoYpos - 1, matrix.Color888(121, 58, 128));
+       matrix.drawPixel(7, dinoYpos - 1, matrix.Color888(121, 58, 128));
+      } else if(noSpam2 == 0){
+        noSpam2++;
+        matrix.drawPixel(3, dinoYpos - 1, matrix.Color888(223, 62, 35));
+        matrix.drawPixel(4, dinoYpos - 1, matrix.Color888(223, 62, 35));
+        matrix.drawPixel(6, dinoYpos - 1, matrix.Color888(89, 193, 53));
+        matrix.drawPixel(7, dinoYpos - 1, matrix.Color888(89, 193, 53));
+      }
+      break;
+    case 2:
+
+    //clear the old position
+    for(int i = 0; i < 7; i++){
+      for(int j = 0; j < 7; j++){
+        matrix.drawPixel(i + 1, dinoYpos - j, matrix.Color333(0, 0, 0));
+      }
+    }
+    
+  
+
+    //Dino is jumping
+      if (jumpBool == 1){
+        //move up
+        jumpBool = 1;
+        dinoYpos--;
+        
+        if(dinoYpos == 6){
+          
+          //when back down jump is over
+          jumpBool = 2;
+        }
+      } else if (jumpBool == 2){
+        if(waitCounter2 == DINOAIRTIME){
+          jumpBool = 3;
+          waitCounter2 = 0;
+        }
+        waitCounter2++;
+
+      }else if (jumpBool == 3){
+        //go down when top is reached
+        dinoYpos++;
+        jumpBool = 3;
+        
+        if(dinoYpos == 14){
+          //when back down jump is over
+          dinoState = 0;
+          jumpBool = 0;          
+        }
+      } 
+
+      drawBasicDinosaurBody();
+      drawBasicDinosaurHead(0, 0);
+     break;
+  }
+}
+
+void drawBasicDinosaurBody(){
+
+   //this dinosaur drawing takes 3% storage !!!!!!!!!!!!!!!!!
+      matrix.drawPixel(7, dinoYpos, matrix.Color888(121, 58, 128));
+      matrix.drawPixel(6, dinoYpos, matrix.Color888(121, 58, 128));
+      matrix.drawPixel(4, dinoYpos, matrix.Color888(223, 62, 35));
+      matrix.drawPixel(3, dinoYpos, matrix.Color888(223, 62, 35));
+
+      matrix.drawPixel(7, dinoYpos - 1, matrix.Color888(89, 193, 53));
+      matrix.drawPixel(6, dinoYpos - 1, matrix.Color888(233, 181, 163));
+      matrix.drawPixel(5, dinoYpos - 1, matrix.Color888(233, 181, 163));
+      matrix.drawPixel(4, dinoYpos - 1, matrix.Color888(89, 193, 53));
+      matrix.drawPixel(3, dinoYpos - 1, matrix.Color888(89, 193, 53));
+      matrix.drawPixel(2, dinoYpos - 1, matrix.Color888(89, 193, 53));
+      
+      matrix.drawPixel(7, dinoYpos - 2, matrix.Color888(89, 193, 53));
+      matrix.drawPixel(6, dinoYpos - 2, matrix.Color888(233, 181, 163));
+      matrix.drawPixel(5, dinoYpos - 2, matrix.Color888(233, 181, 163));
+      matrix.drawPixel(4, dinoYpos - 2, matrix.Color888(89, 193, 53));
+      matrix.drawPixel(3, dinoYpos - 2, matrix.Color888(89, 193, 53));
+      matrix.drawPixel(2, dinoYpos - 2, matrix.Color888(250, 106, 10));
+      matrix.drawPixel(1, dinoYpos - 2, matrix.Color888(89, 193, 53));
+
+
+}
+
+void drawBasicDinosaurHead(int xOffset, int yOffset){
+      matrix.drawPixel(6 +xOffset, dinoYpos - 3 + yOffset, matrix.Color888(254, 243, 192));
+      matrix.drawPixel(5 +xOffset, dinoYpos - 3 + yOffset,matrix.Color888(254, 243, 192));
+      matrix.drawPixel(4 +xOffset, dinoYpos - 3 + yOffset, matrix.Color888(254, 243, 192));
+      matrix.drawPixel(3 +xOffset, dinoYpos - 3 + yOffset, matrix.Color888(250, 106, 10));
+     
+      matrix.drawPixel(7 + xOffset, dinoYpos - 4 + yOffset, matrix.Color888(156, 219, 67));
+      matrix.drawPixel(6 + xOffset, dinoYpos - 4 + yOffset, matrix.Color888(156, 219, 67));
+      matrix.drawPixel(5 + xOffset, dinoYpos - 4 + yOffset, matrix.Color888(156, 219, 67));
+      matrix.drawPixel(4 + xOffset, dinoYpos - 4 + yOffset,  matrix.Color888(254, 243, 192));
+      matrix.drawPixel(3 + xOffset, dinoYpos - 4 + yOffset, matrix.Color888(254, 243, 192));
+      matrix.drawPixel(2 + xOffset, dinoYpos - 4 + yOffset,  matrix.Color888(250, 106, 10));
+
+      matrix.drawPixel(7 + xOffset, dinoYpos - 5 + yOffset, matrix.Color888(156, 219, 67));
+      matrix.drawPixel(6 + xOffset, dinoYpos - 5 + yOffset, matrix.Color888(156, 219, 67));
+      matrix.drawPixel(5 + xOffset, dinoYpos - 5 + yOffset, matrix.Color888(156, 219, 67));
+      matrix.drawPixel(4 + xOffset, dinoYpos - 5 + yOffset, matrix.Color888(6, 6, 8));
+      matrix.drawPixel(3 + xOffset, dinoYpos - 5 + yOffset, matrix.Color888(156, 219, 67));
+
+      matrix.drawPixel(6 + xOffset, dinoYpos - 6 + yOffset, matrix.Color888(156, 219, 67));
+      matrix.drawPixel(5 + xOffset, dinoYpos - 6 + yOffset,matrix.Color888(89, 193, 53));
+      matrix.drawPixel(4 + xOffset, dinoYpos - 6 + yOffset,matrix.Color888(156, 219, 67));
+      matrix.drawPixel(3 + xOffset, dinoYpos - 6 + yOffset, matrix.Color888(250, 106, 10));
+}
+
+
+//-------------------------------------
+// dino lose screen
+//-----------------------------------
+
+void dinoRunLose(){
+if(waitCounter == 0){
+  clearScreen();
+  matrix.setCursor(1, 0);  // start at top left, with one pixel of spacing
+  matrix.setTextSize(1);
+  matrix.setTextColor(matrix.Color888(143, 86, 59));
+  matrix.print("Score");
+  matrix.setTextColor(matrix.Color333(7,7,7));
+  matrix.setCursor(1, 8);
+  matrix.print(dinoScore);
+  waitCounter++;
+}
+
+  if(noSpam == 0){
+    if(actionPressed == 1){
+      gameState = 0;
+    }
+  }
+  if(actionPressed == 0){
+      noSpam = 0;
+  }
+  
 
 
 }
