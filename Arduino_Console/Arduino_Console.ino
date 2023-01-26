@@ -1047,8 +1047,6 @@ void dinoRender(){
       }
     }
     
-  
-
     //Dino is jumping
       if (jumpBool == 1){
         //move up
@@ -1162,9 +1160,6 @@ if(waitCounter == 0){
   if(actionPressed == 0){
       noSpam = 0;
   }
-  
-
-
 }
 
 // ------------------------------------------------------------------------------- 
@@ -1173,141 +1168,74 @@ if(waitCounter == 0){
 
 // ------------------------------------------------------------------------------- 
 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-
-// ------------------------------------------------------- 
-
 // copied from snake, fitted to WHACK: 
 
 const int WHACKDISPX = 31; 
-
 const int WHACKDISPY = 15; 
-
 int WHACKDisp[WHACKDISPX+1][WHACKDISPY+1]; 
-
 int selectedside = 4; 
-
 int WaitForLaser = 0;
-
 int WhackScore = 0;
 
-
-
 struct hole{ 
-
   int xPos; 
-
   int yPos; 
-
   int side; // 1,2,3,4 = up, right, down, left 
-
   int mode; // if mode is 1 hole goes right, if 0 hole goes left. 
-
 }; 
 
 struct laser{
-
   int xPos;
-
   int yPos;
-
   int side; //1,2,3,4 = up, right, down, left 
-
   int mode; // if mode is 1 laser comes out, if 0 laser retracts. 
-  
   int foodX;
-  
   int foodY;
   
 };
- 
 struct laser laser;
- 
-
 struct hole holeLeft; 
-
-struct hole holeRight; 
-
+struct hole holeRight;
 struct hole holeUp; 
-
 struct hole holeDown; 
 
- 
- 
- 
 
 // ----------------------------------------------------- 
 
- 
  
 
  //setup the Whack game 
 
  
  
-
 // ----------------------------------------------------- 
 
 void WhackSetup(){    
 
-   
-
   // initial values 
-
 holeLeft.xPos = 0; 
-
 holeLeft.yPos = 8; 
-
 holeLeft.side = 4; 
-
-holeLeft.mode = 1; 
-
+holeLeft.mode = 1;
 holeRight.xPos = 31; 
-
 holeRight.yPos = 8; 
-
 holeRight.side = 2; 
-
 holeRight.mode = 1; 
-
 holeUp.xPos = 16; 
-
 holeUp.yPos = 0; 
-
 holeUp.side = 1; 
-
 holeUp.mode = 1; 
-
 holeDown.xPos = 16; 
-
 holeDown.yPos = 15; 
-
 holeDown.side = 3; 
-
 holeDown.mode = 1; 
-
 laser.xPos = 0;
-
 laser.yPos = 0;
-
 laser.side = 1;
-
 laser.mode = 0;
- 
 laser.foodX = 0;
- 
 laser.foodY = 0;
  
- 
-
   clearScreen(); 
 
   WhackHoleRender(); 
@@ -1315,284 +1243,148 @@ laser.foodY = 0;
   respawnTarget();
   //respawnFood();
 
- 
- 
-
   waitCounter = 0; 
-
-    
 
   int i, j; 
 
   for (i = 0; i < 32; i++) { 
-
     for (j = 0; j < 16; j++) { 
-
       WHACKDisp[i][j] = 0; 
-
     } 
-
   } 
-
 //------------------------------------------------------ 
 
- 
- 
 
 // ----------------------------------------------------- 
 
 // copied from snake, fitted to WHACK: 
-
- 
- 
-
-
-
- 
- 
-
 } 
 
- 
- 
-
 void WhackHoleRender(){ 
-
-
+  
       // Down erase
-
       matrix.drawPixel( holeDown.xPos+1, holeDown.yPos ,matrix.Color333(0, 0, 0));
-
       matrix.drawPixel( holeDown.xPos-2, holeDown.yPos ,matrix.Color333(0, 0, 0));      
  
- 
-
       // Up erase     
-
       matrix.drawPixel( holeUp.xPos+1, holeUp.yPos ,matrix.Color333(0, 0, 0));
-
       matrix.drawPixel( holeUp.xPos-2, holeUp.yPos ,matrix.Color333(0, 0, 0));
  
-
       // Left erase
-
       matrix.drawPixel( holeLeft.xPos, holeLeft.yPos+1 ,matrix.Color333(0, 0, 0));
-
       matrix.drawPixel( holeLeft.xPos, holeLeft.yPos-2 ,matrix.Color333(0, 0, 0));
  
-
       // Right erase
-
       matrix.drawPixel( holeRight.xPos, holeRight.yPos+1 ,matrix.Color333(0, 0, 0));
-
       matrix.drawPixel( holeRight.xPos, holeRight.yPos-2 ,matrix.Color333(0, 0, 0));
- 
-      // Down print
- 
-      matrix.drawPixel( holeDown.xPos, holeDown.yPos ,matrix.Color333(7, 7, 7)); 
 
+      // Down print
+      matrix.drawPixel( holeDown.xPos, holeDown.yPos ,matrix.Color333(7, 7, 7)); 
       matrix.drawPixel( holeDown.xPos-1, holeDown.yPos ,matrix.Color333(7, 7, 7));
  
-
       // Up print
-
       matrix.drawPixel( holeUp.xPos, holeUp.yPos ,matrix.Color333(7, 7, 7)); 
-
       matrix.drawPixel( holeUp.xPos-1, holeUp.yPos ,matrix.Color333(7, 7, 7)); 
 
 
       // Left print
-
       matrix.drawPixel( holeLeft.xPos, holeLeft.yPos ,matrix.Color333(7, 7, 7)); 
-
       matrix.drawPixel( holeLeft.xPos, holeLeft.yPos-1 ,matrix.Color333(7, 7, 7)); 
 
-
       // Right print
-
       matrix.drawPixel( holeRight.xPos, holeRight.yPos ,matrix.Color333(7, 7, 7)); 
-
       matrix.drawPixel( holeRight.xPos, holeRight.yPos-1 ,matrix.Color333(7, 7, 7)); 
-
-  
 }
- 
- 
-
 // ----------------------------------------------------- 
 
- 
- 
 
- // run the wack game 
+
+// run the wack game 
+
 
  
- 
-
 // ----------------------------------------------------- 
 
 // copied from snake, still need to edit: 
 
-void WhackRun(){ 
-
- 
- 
-
+void WhackRun(){
   //read the joystick 
-
   if (joystickDirection != 0){ 
-
-       
       if (WaitForLaser == 0){
       selectedside = joystickDirection; 
       }
   } 
-
     //make sure the game doesnt update every tick because thats way too fast. 
-
   if(waitCounter == GAMESPEED){ 
-
     waitCounter = 0; 
-
- 
- 
- 
   if (WaitForLaser == 0){// so the hole stands still when the laser comes out
     WhackSideSelect(); 
     WhackHoleRender();
-  }
-
+     }
     WhackLaser();
-  
-    
-     
-
-    } 
-
- 
- 
-
+  } 
     waitCounter++; 
-
- 
- 
- 
-
-     
-
 } 
-
- 
- 
-
 // ----------------------------------------------------- 
-
- 
- 
-
 void WhackSideSelect(){ 
-
-
   switch(selectedside){ 
-
    case 1: 
-
       WhackHorizontalMovement(3); 
       laser.yPos=holeDown.yPos;
-
-    break; 
-
+    break;
    case 2: 
-
       WhackVerticalMovement(2); 
       laser.xPos=holeRight.xPos;
-
     break; 
-
    case 3: 
-
       WhackHorizontalMovement(1); 
       laser.yPos=holeUp.yPos;
-
     break; 
-
    case 4: 
-
       WhackVerticalMovement(4); 
       laser.xPos=holeLeft.xPos;
-
     break; 
-
   } 
 } 
-
- 
  
 // movement of holes (not their sprites), so a 1x1 pixel
 void WhackHorizontalMovement(int side){ 
-
- 
- 
-
-    if (side == 1){ 
-
-
+  
+    if (side == 1){
 // switch direction after reaching last pixel
       if (holeUp.xPos > (WHACKDISPX - 1)){
-      
         holeUp.mode = 1;
-
       } 
       
  // switch direction after reaching first pixel
       else if (holeUp.xPos < 2){
-
         holeUp.mode = 0;
-
       }
-
-
-
+      
       // moving the hole
       if (holeUp.mode == 0){
-      
           holeUp.xPos++;
       }
 
       else if (holeUp.mode == 1){
-
           holeUp.xPos--;
       }
- 
-
-  
-       
-        
-      
-
     } 
 
     else if (side == 3){ 
 
  // switch direction after reaching last pixel
       if (holeDown.xPos > (WHACKDISPX - 1)){
-      
         holeDown.mode = 1;
-
       } 
       
  // switch direction after reaching first pixel
       else if (holeDown.xPos < 2){
-
         holeDown.mode = 0;
-
       }
-
-
 
      // moving the hole
       if (holeDown.mode == 0){
-      
           holeDown.xPos++;
       }
 
@@ -1600,94 +1392,56 @@ void WhackHorizontalMovement(int side){
 
           holeDown.xPos--;
 
-      }
- 
-
-      
-
-       
-
+        }
     } 
-
 } 
 
 // movement of holes (not their sprites), so a 1x1 pixel
 void WhackVerticalMovement(int side){ 
-
- 
- 
-
     if (side == 2){ 
 
  // switch direction after reaching last pixel
       if (holeRight.yPos > (WHACKDISPY - 1)){
-      
         holeRight.mode = 1;
-
       } 
       
  // switch direction after reaching first pixel
       else if (holeRight.yPos < 2){
-
         holeRight.mode = 0;
-
       }
 
 
 
      // moving the hole
       if (holeRight.mode == 0){
-      
           holeRight.yPos++;
       }
 
       else if (holeRight.mode == 1){
-
           holeRight.yPos--;
-
       }
-
     } 
-
     else if (side == 4){ 
-
  // switch direction after reaching last pixel
       if (holeLeft.yPos > (WHACKDISPY - 1)){
-      
         holeLeft.mode = 1;
-
       } 
       
  // switch direction after reaching first pixel
       else if (holeLeft.yPos < 2){
-
         holeLeft.mode = 0;
-
       }
-
-
-
      // moving the hole
       if (holeLeft.mode == 0){
-      
           holeLeft.yPos++;
       }
 
       else if (holeLeft.mode == 1){
-
           holeLeft.yPos--;
 
       }
- 
-
-      
-
-       
-
     } 
-
- 
- 
+    
 // --------------------------------------
 // laser buisiness
 // --------------------------------------
@@ -1710,33 +1464,26 @@ if (WaitForLaser == 1){
 
     WhackLaserDown();
      
-
     break; 
 
    case 2: 
 
     WhackLaserRight();
       
-
     break; 
 
    case 3: 
 
     WhackLaserUp();
       
-
     break; 
 
    case 4: 
 
     WhackLaserLeft();
-      
-
+    
     break; 
-
-  
-   }
-
+    }
   }
 }
 
@@ -1744,7 +1491,6 @@ if (WaitForLaser == 1){
 
 
 void WhackLaserUp(){// the coordinates and rendering of the laser in and out of hole movement
-
 
   laser.xPos = holeUp.xPos;// laser will come out of hole
 
@@ -1754,7 +1500,6 @@ void WhackLaserUp(){// the coordinates and rendering of the laser in and out of 
 
   else if (laser.mode == 1){// laser retracts when border is touched
   laser.yPos--;
-
   // temporary double speed while retracting laser
   LaserRender(1);
   laser.yPos--;
@@ -1763,12 +1508,10 @@ void WhackLaserUp(){// the coordinates and rendering of the laser in and out of 
   LaserRender(1);
 
   if (laser.yPos > WHACKDISPY-1){
-
   laser.mode=1;//laser will retract
   }
 
   else if (laser.yPos < 1){// laser fully retracted
-
   laser.mode=0;// laser is done: 
   WaitForLaser=0;// hole moves on
   laser.yPos=holeUp.yPos;
@@ -1779,14 +1522,13 @@ void WhackLaserUp(){// the coordinates and rendering of the laser in and out of 
 void WhackLaserDown(){
 
   laser.xPos = holeDown.xPos;// laser will come out of hole
-
+  
   if (laser.mode == 0){// laser comes out when on screen
   laser.yPos--;
   }
 
   else if (laser.mode == 1){// laser retracts when border is touched
   laser.yPos++;
-
   // temporary double speed while retracting laser
   LaserRender(3);
   laser.yPos++;
@@ -1794,38 +1536,31 @@ void WhackLaserDown(){
 
   LaserRender(3);
 
- 
-
   if (laser.yPos == laser.foodY & laser.xPos == laser.foodX ){
-
   laser.mode=1;//laser will retract
   WhackScore++;
   eraseTarget();
   }
 
   else if (laser.yPos == laser.foodY & laser.xPos == laser.foodX+1 ){
-
   laser.mode=1;//laser will retract
   WhackScore++;
   eraseTarget();
   }
 
   else if (laser.yPos == laser.foodY & laser.xPos == laser.foodX+2 ){
-
   laser.mode=1;//laser will retract
   WhackScore++;
   eraseTarget();
   }
 
   else if (laser.yPos > WHACKDISPY-1){// laser fully retracted
-
   laser.mode=0;// laser is done: 
   WaitForLaser=0;// hole moves on
   laser.yPos=holeDown.yPos;
   }
  
   else if (laser.yPos < 1){
-  
   //laser.yPos=4;
         //WhackSetup();
     waitCounter = -1;
@@ -1833,13 +1568,9 @@ void WhackLaserDown(){
     noSpam = 0;
     if(actionPressed == 1){ // make sure the end screen is not skipped
     noSpam = 1;
-
-
-  } 
+    }
   } 
 }
-
-  
 
 void WhackLaserLeft(){
 
@@ -1848,10 +1579,8 @@ void WhackLaserLeft(){
   if (laser.mode == 0){// laser comes out when on screen
   laser.xPos++;
   }
-
   else if (laser.mode == 1){// laser retracts when border is touched
   laser.xPos--;
-
   // temporary double speed while retracting laser
   LaserRender(2);
   laser.xPos--;
@@ -1860,26 +1589,20 @@ void WhackLaserLeft(){
   LaserRender(2);
 
   if (laser.xPos > WHACKDISPX-1){
-
   laser.mode=1;//laser will retract
   }
 
   else if (laser.xPos < 1){// laser fully retracted
-
   laser.mode=0;// laser is done: 
   WaitForLaser=0;// hole moves on
   laser.xPos=holeLeft.xPos;
   }
-
-
-  
 }
-
 
 void WhackLaserRight(){
 
   laser.yPos = holeRight.yPos;// laser will come out of hole
-
+  
   if (laser.mode == 0){// laser comes out when on screen
   laser.xPos--;
   }
@@ -1891,92 +1614,67 @@ void WhackLaserRight(){
   LaserRender(4);
   laser.xPos++;
   }
-
+  
   LaserRender(4);
 
   if (laser.xPos < 1){
-
   laser.mode=1;//laser will retract
   }
 
   else if (laser.xPos > WHACKDISPX-1){// laser fully retracted
-
   laser.mode=0;// laser is done: 
   WaitForLaser=0;// hole moves on
   laser.xPos=holeRight.xPos;
   }
-
-
-  
 }
-
 
 void LaserRender(int side){// rendering the laser from the selected position
 
   switch(side){
-
    case 1: //up
 
 // draw laser
    matrix.drawPixel( laser.xPos, laser.yPos ,matrix.Color333(7, 7, 7));
-
    matrix.drawPixel( laser.xPos-1, laser.yPos ,matrix.Color333(7, 7, 7));
 
 // erase laser
    matrix.drawPixel( laser.xPos, laser.yPos+1 ,matrix.Color333(0, 0, 0));
-
    matrix.drawPixel( laser.xPos-1, laser.yPos+1 ,matrix.Color333(0, 0, 0));
    
     break; 
-
    case 2: //left
 
 // draw laser
    matrix.drawPixel( laser.xPos, laser.yPos ,matrix.Color333(7, 7, 7));
-
    matrix.drawPixel( laser.xPos, laser.yPos-1 ,matrix.Color333(7, 7, 7));
 
 // erase laser
    matrix.drawPixel( laser.xPos+1, laser.yPos ,matrix.Color333(0, 0, 0));
-
    matrix.drawPixel( laser.xPos+1, laser.yPos-1 ,matrix.Color333(0, 0, 0));
- 
 
     break; 
-
    case 3: //down
-
+   
 // draw laser
    matrix.drawPixel( laser.xPos, laser.yPos ,matrix.Color333(7, 7, 7));
-
    matrix.drawPixel( laser.xPos-1, laser.yPos ,matrix.Color333(7, 7, 7));
 
 // erase laser
    matrix.drawPixel( laser.xPos, laser.yPos-1 ,matrix.Color333(0, 0, 0));
-
    matrix.drawPixel( laser.xPos-1, laser.yPos-1 ,matrix.Color333(0, 0, 0));
       
-
     break; 
-
    case 4: //right
 
 // draw laser
    matrix.drawPixel( laser.xPos, laser.yPos ,matrix.Color333(7, 7, 7));
-
    matrix.drawPixel( laser.xPos, laser.yPos-1 ,matrix.Color333(7, 7, 7));
 
 // erase laser
    matrix.drawPixel( laser.xPos-1, laser.yPos ,matrix.Color333(0, 0, 0));
-
    matrix.drawPixel( laser.xPos-1, laser.yPos-1 ,matrix.Color333(0, 0, 0));
- 
-
     break; 
-
-  
    }
-
 }
 
 //-----------------------------
@@ -1995,7 +1693,6 @@ void respawnTarget(){
 }
 
 void eraseTarget(){
-
   matrix.drawPixel(laser.foodX, laser.foodY, matrix.Color333(0, 0, 0));
   matrix.drawPixel(laser.foodX+1, laser.foodY, matrix.Color333(0, 0, 0));
   matrix.drawPixel(laser.foodX, laser.foodY+1, matrix.Color333(0, 0, 0));
@@ -2003,10 +1700,7 @@ void eraseTarget(){
   respawnTarget();
 }
 
-
 void WhackLose(){
-
-
 if(waitCounter == 0){
   clearScreen();
   matrix.setCursor(1, 0);  // start at top left, with one pixel of spacing
@@ -2032,9 +1726,3 @@ if(waitCounter == 0){
 
 
 }
-
-
-
-
-
-
