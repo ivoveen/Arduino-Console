@@ -7,7 +7,7 @@
 #define B   A1
 #define C   A2
 
-//--------------------------
+//---------------------------
 //matrix is the screen
 RGBmatrixPanel matrix(A, B, C, CLK, LAT, OE, false);
 
@@ -271,7 +271,6 @@ void mainMenuRun(){
       case 0:
       gameState = 1;   
       snakeSetup();
-      
       break;
       case 1:
       gameState = 5;   
@@ -1235,7 +1234,10 @@ laser.side = 1;
 laser.mode = 0;
 laser.foodX = 0;
 laser.foodY = 0;
- 
+noSpam = 0;
+noSpam2 = 1;
+WaitForLaser = 0;
+
   clearScreen(); 
 
   WhackHoleRender(); 
@@ -1451,40 +1453,45 @@ void WhackVerticalMovement(int side){
 void WhackLaser(){
 
 if (actionPressed == 1){
-
   WaitForLaser =1;
+  if (noSpam2 == 1){
+    noSpam2 = 0;
+    switch(selectedside){ 
+   case 1: 
+      laser.yPos=holeDown.yPos;
+    break;
+   case 2: 
+      laser.xPos=holeRight.xPos;
+    break; 
+   case 3: 
+      laser.yPos=holeUp.yPos;
+    break; 
+   case 4: 
+      laser.xPos=holeLeft.xPos;
+    break; 
+    } 
+  }
 }
 
 if (WaitForLaser == 1){
-
-
   switch(selectedside){
-
    case 1: 
-
     WhackLaserDown();
-     
     break; 
-
    case 2: 
-
     WhackLaserRight();
-      
     break; 
-
-   case 3: 
-
+   case 3:
     WhackLaserUp();
-      
     break; 
-
    case 4: 
-
     WhackLaserLeft();
-    
-    break; 
-    }
+    break;
   }
+  }
+else{
+  noSpam2 = 1;
+}
 }
 
 
@@ -1520,7 +1527,7 @@ void WhackLaserUp(){// the coordinates and rendering of the laser in and out of 
 }
 
 void WhackLaserDown(){
-
+  
   laser.xPos = holeDown.xPos;// laser will come out of hole
   
   if (laser.mode == 0){// laser comes out when on screen
@@ -1715,14 +1722,11 @@ if(waitCounter == 0){
 
   if(noSpam == 0){
     if(actionPressed == 1){
-
       gameState = 0;
     }
   }
+
   if(actionPressed == 0){
       noSpam = 0;
   }
-
-
-
 }
