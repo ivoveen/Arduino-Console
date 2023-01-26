@@ -37,7 +37,7 @@ int waitCounter2 = 0;
 //---------------------------
 const int SCROLLSPEED = 1200;
 const int GAMESPEED = 800;
-const char *GAMES[6] = {"Snake", "Dino", "Whack", "Catch", "Shoot"};
+const char *GAMES[4] = {"Snake", "Dino", "Whack", "Rythm"};
 int gameSelected = 0;
 
 
@@ -251,6 +251,12 @@ void loop() {
    case 6:
     dinoRunLose();
     break;
+   case 7:
+    rythmRun();
+    break;
+   case 8:
+    rythmLose();
+    break;
   }
 }
 
@@ -272,24 +278,22 @@ void mainMenuRun(){
       gameState = 1;   
       snakeSetup();
       break;
+
       case 1:
       gameState = 5;   
       dinoRunSetup();
       break;
+
       case 2:
       gameState = 3;   
       WhackSetup();
       break;
+
       case 3:
-
+      gameState = 7;
+      rythmSetup();
       break;
-      case 4:
-
-      break;
-      
     }
-
-    
   }
 
 
@@ -1175,6 +1179,7 @@ int WHACKDisp[WHACKDISPX+1][WHACKDISPY+1];
 int selectedside = 4; 
 int WaitForLaser = 0;
 int WhackScore = 0;
+int WhackGAMESPEED = GAMESPEED;
 
 struct hole{ 
   int xPos; 
@@ -1237,6 +1242,8 @@ laser.foodY = 0;
 noSpam = 0;
 noSpam2 = 1;
 WaitForLaser = 0;
+WhackScore = 0;
+WhackGAMESPEED = 800;
 
   clearScreen(); 
 
@@ -1263,12 +1270,12 @@ WaitForLaser = 0;
 } 
 
 void WhackHoleRender(){ 
-  
+
       // Down erase
       matrix.drawPixel( holeDown.xPos+1, holeDown.yPos ,matrix.Color333(0, 0, 0));
-      matrix.drawPixel( holeDown.xPos-2, holeDown.yPos ,matrix.Color333(0, 0, 0));      
+      matrix.drawPixel( holeDown.xPos-2, holeDown.yPos ,matrix.Color333(0, 0, 0));
  
-      // Up erase     
+      // Up erase
       matrix.drawPixel( holeUp.xPos+1, holeUp.yPos ,matrix.Color333(0, 0, 0));
       matrix.drawPixel( holeUp.xPos-2, holeUp.yPos ,matrix.Color333(0, 0, 0));
  
@@ -1281,22 +1288,22 @@ void WhackHoleRender(){
       matrix.drawPixel( holeRight.xPos, holeRight.yPos-2 ,matrix.Color333(0, 0, 0));
 
       // Down print
-      matrix.drawPixel( holeDown.xPos, holeDown.yPos ,matrix.Color333(7, 7, 7)); 
+      matrix.drawPixel( holeDown.xPos, holeDown.yPos ,matrix.Color333(7, 7, 7));
       matrix.drawPixel( holeDown.xPos-1, holeDown.yPos ,matrix.Color333(7, 7, 7));
  
       // Up print
-      matrix.drawPixel( holeUp.xPos, holeUp.yPos ,matrix.Color333(7, 7, 7)); 
-      matrix.drawPixel( holeUp.xPos-1, holeUp.yPos ,matrix.Color333(7, 7, 7)); 
-
+      matrix.drawPixel( holeUp.xPos, holeUp.yPos ,matrix.Color333(7, 7, 7));
+      matrix.drawPixel( holeUp.xPos-1, holeUp.yPos ,matrix.Color333(7, 7, 7));
 
       // Left print
-      matrix.drawPixel( holeLeft.xPos, holeLeft.yPos ,matrix.Color333(7, 7, 7)); 
-      matrix.drawPixel( holeLeft.xPos, holeLeft.yPos-1 ,matrix.Color333(7, 7, 7)); 
+      matrix.drawPixel( holeLeft.xPos, holeLeft.yPos ,matrix.Color333(7, 7, 7));
+      matrix.drawPixel( holeLeft.xPos, holeLeft.yPos-1 ,matrix.Color333(7, 7, 7));
 
       // Right print
-      matrix.drawPixel( holeRight.xPos, holeRight.yPos ,matrix.Color333(7, 7, 7)); 
-      matrix.drawPixel( holeRight.xPos, holeRight.yPos-1 ,matrix.Color333(7, 7, 7)); 
+      matrix.drawPixel( holeRight.xPos, holeRight.yPos ,matrix.Color333(7, 7, 7));
+      matrix.drawPixel( holeRight.xPos, holeRight.yPos-1 ,matrix.Color333(7, 7, 7));
 }
+
 // ----------------------------------------------------- 
 
 
@@ -1310,23 +1317,26 @@ void WhackHoleRender(){
 // copied from snake, still need to edit: 
 
 void WhackRun(){
-  //read the joystick 
-  if (joystickDirection != 0){ 
+  //read the joystick
+  if (joystickDirection != 0){
       if (WaitForLaser == 0){
-      selectedside = joystickDirection; 
+      selectedside = joystickDirection;
       }
-  } 
-    //make sure the game doesnt update every tick because thats way too fast. 
-  if(waitCounter == GAMESPEED){ 
-    waitCounter = 0; 
+  }
+    //make sure the game doesnt update every tick because thats way too fast.
+  
+  if(waitCounter == WhackGAMESPEED){
+    waitCounter = 0;
+    Serial.print(WhackGAMESPEED);
   if (WaitForLaser == 0){// so the hole stands still when the laser comes out
-    WhackSideSelect(); 
+    WhackSideSelect();
     WhackHoleRender();
-     }
+    }
     WhackLaser();
-  } 
-    waitCounter++; 
-} 
+  }
+    waitCounter++;
+}
+
 // ----------------------------------------------------- 
 void WhackSideSelect(){ 
   switch(selectedside){ 
@@ -1447,11 +1457,9 @@ void WhackVerticalMovement(int side){
 // --------------------------------------
 // laser buisiness
 // --------------------------------------
-
 } 
 
 void WhackLaser(){
-
 if (actionPressed == 1){
   WaitForLaser =1;
   if (noSpam2 == 1){
@@ -1494,8 +1502,11 @@ else{
 }
 }
 
-
-
+void WhackSpeedup(){
+  if (WhackGAMESPEED-50 > 100){
+    WhackGAMESPEED= WhackGAMESPEED-50;
+  }
+}
 
 void WhackLaserUp(){// the coordinates and rendering of the laser in and out of hole movement
 
@@ -1514,8 +1525,25 @@ void WhackLaserUp(){// the coordinates and rendering of the laser in and out of 
 
   LaserRender(1);
 
-  if (laser.yPos > WHACKDISPY-1){
+  if (laser.yPos == laser.foodY & laser.xPos == laser.foodX ){
   laser.mode=1;//laser will retract
+  WhackScore++;
+  WhackSpeedup();
+  eraseTarget();
+  }
+
+  else if (laser.yPos == laser.foodY & laser.xPos == laser.foodX+1 ){
+  laser.mode=1;//laser will retract
+  WhackScore++;
+  WhackSpeedup();
+  eraseTarget();
+  }
+
+  else if (laser.yPos == laser.foodY & laser.xPos == laser.foodX+2 ){
+  laser.mode=1;//laser will retract
+  WhackScore++;
+  WhackSpeedup();
+  eraseTarget();
   }
 
   else if (laser.yPos < 1){// laser fully retracted
@@ -1523,7 +1551,17 @@ void WhackLaserUp(){// the coordinates and rendering of the laser in and out of 
   WaitForLaser=0;// hole moves on
   laser.yPos=holeUp.yPos;
   }
-
+ 
+  else if (laser.yPos > 15){
+  //laser.yPos=4;
+        //WhackSetup();
+    waitCounter = -1;
+    gameState = 4;
+    noSpam = 0;
+    if(actionPressed == 1){ // make sure the end screen is not skipped
+    noSpam = 1;
+    }
+  } 
 }
 
 void WhackLaserDown(){
@@ -1546,18 +1584,21 @@ void WhackLaserDown(){
   if (laser.yPos == laser.foodY & laser.xPos == laser.foodX ){
   laser.mode=1;//laser will retract
   WhackScore++;
+  WhackSpeedup();
   eraseTarget();
   }
 
   else if (laser.yPos == laser.foodY & laser.xPos == laser.foodX+1 ){
   laser.mode=1;//laser will retract
   WhackScore++;
+  WhackSpeedup();
   eraseTarget();
   }
 
   else if (laser.yPos == laser.foodY & laser.xPos == laser.foodX+2 ){
   laser.mode=1;//laser will retract
   WhackScore++;
+  WhackSpeedup();
   eraseTarget();
   }
 
@@ -1595,8 +1636,25 @@ void WhackLaserLeft(){
 
   LaserRender(2);
 
-  if (laser.xPos > WHACKDISPX-1){
+  if (laser.yPos == laser.foodY & laser.xPos == laser.foodX ){
   laser.mode=1;//laser will retract
+  WhackScore++;
+  WhackSpeedup();
+  eraseTarget();
+  }
+
+  else if (laser.yPos == laser.foodY+1 & laser.xPos == laser.foodX ){
+  laser.mode=1;//laser will retract
+  WhackScore++;
+  WhackSpeedup();
+  eraseTarget();
+  }
+
+  else if (laser.yPos == laser.foodY+2 & laser.xPos == laser.foodX ){
+  laser.mode=1;//laser will retract
+  WhackScore++;
+  WhackSpeedup();
+  eraseTarget();
   }
 
   else if (laser.xPos < 1){// laser fully retracted
@@ -1604,6 +1662,17 @@ void WhackLaserLeft(){
   WaitForLaser=0;// hole moves on
   laser.xPos=holeLeft.xPos;
   }
+ 
+  else if (laser.xPos > WHACKDISPX-1){
+  //laser.yPos=4;
+        //WhackSetup();
+    waitCounter = -1;
+    gameState = 4;
+    noSpam = 0;
+    if(actionPressed == 1){ // make sure the end screen is not skipped
+    noSpam = 1;
+    }
+  } 
 }
 
 void WhackLaserRight(){
@@ -1622,10 +1691,27 @@ void WhackLaserRight(){
   laser.xPos++;
   }
   
-  LaserRender(4);
+   LaserRender(4);
 
-  if (laser.xPos < 1){
+  if (laser.yPos == laser.foodY & laser.xPos == laser.foodX ){
   laser.mode=1;//laser will retract
+  WhackScore++;
+  WhackSpeedup();
+  eraseTarget();
+  }
+
+  else if (laser.yPos == laser.foodY+1 & laser.xPos == laser.foodX ){
+  laser.mode=1;//laser will retract
+  WhackScore++;
+  WhackSpeedup();
+  eraseTarget();
+  }
+
+  else if (laser.yPos == laser.foodY+2 & laser.xPos == laser.foodX ){
+  laser.mode=1;//laser will retract
+  WhackScore++;
+  WhackSpeedup();
+  eraseTarget();
   }
 
   else if (laser.xPos > WHACKDISPX-1){// laser fully retracted
@@ -1633,6 +1719,17 @@ void WhackLaserRight(){
   WaitForLaser=0;// hole moves on
   laser.xPos=holeRight.xPos;
   }
+ 
+  else if (laser.xPos < 1){
+  //laser.yPos=4;
+        //WhackSetup();
+    waitCounter = -1;
+    gameState = 4;
+    noSpam = 0;
+    if(actionPressed == 1){ // make sure the end screen is not skipped
+    noSpam = 1;
+    }
+  } 
 }
 
 void LaserRender(int side){// rendering the laser from the selected position
@@ -1730,3 +1827,135 @@ if(waitCounter == 0){
       noSpam = 0;
   }
 }
+
+
+
+
+
+
+
+
+//------------------------------------------------------------------------------------------------------------------
+// Rythm code
+//------------------------------------------------------------------------------------------------------------------
+
+int NoteType = 0;
+
+struct Note{
+  int PosX;
+  int PosY;
+  int NoteT;
+};
+
+struct Note N1;
+struct Note N2;
+struct Note N3;
+
+void rythmSetup(){
+  N1.PosX = 15;
+  N1.PosY = 0;
+  N1.NoteT = 1;
+
+  N2.PosX = 15;
+  N2.PosY = 5;
+  N2.NoteT = 2;
+
+  N3.PosX = 15;
+  N3.PosY = 10;
+  N3.NoteT = 3;
+
+
+  clearScreen();
+  rythmRender();
+}
+
+void rythmRender(){
+  matrix.fillRect(0,0,5,5,matrix.Color888(0,0,0));
+  matrix.fillRect(0,5,5,5,matrix.Color888(0,0,0));
+  matrix.fillRect(0,10,5,5,matrix.Color888(0,0,0));
+
+  matrix.drawLine(2,0,2,15,matrix.Color888(0,0,0));
+  
+  matrix.drawLine(0,31,16,31,matrix.Color888(0,0,0));
+
+  matrix.drawLine(5,4,16,4,matrix.Color888(0,0,0));
+  matrix.drawLine(5,9,16,9,matrix.Color888(0,0,0));
+  matrix.drawLine(5,14,16,14,matrix.Color888(0,0,0));
+}
+
+void NoteSpriteUp(){
+
+  matrix.drawPixel(N1.PosX, N1.PosY, matrix.Color888(237,28,35));
+
+  matrix.drawPixel(N1.PosX, N1.PosY, matrix.Color888(237,28,35));
+
+  matrix.drawPixel(N1.PosX, N1.PosY, matrix.Color888(237,28,35));
+  matrix.drawPixel(N1.PosX, N1.PosY, matrix.Color888(237,28,35));
+  matrix.drawPixel(N1.PosX, N1.PosY, matrix.Color888(237,28,35));
+  matrix.drawPixel(N1.PosX, N1.PosY, matrix.Color888(237,28,35));
+  matrix.drawPixel(N1.PosX, N1.PosY, matrix.Color888(237,28,35));
+
+  matrix.drawPixel(N1.PosX, N1.PosY, matrix.Color888(237,28,35));
+
+  matrix.drawPixel(N1.PosX, N1.PosY, matrix.Color888(237,28,35));
+}
+
+void NoteSpriteLeft(){
+
+  matrix.drawPixel(N2.PosX, N2.PosY, matrix.Color888(237,28,35));
+
+  matrix.drawPixel(N2.PosX, N2.PosY, matrix.Color888(237,28,35));
+
+  matrix.drawPixel(N2.PosX, N2.PosY, matrix.Color888(237,28,35));
+  matrix.drawPixel(N2.PosX, N2.PosY, matrix.Color888(237,28,35));
+  matrix.drawPixel(N2.PosX, N2.PosY, matrix.Color888(237,28,35));
+
+  matrix.drawPixel(N2.PosX, N2.PosY, matrix.Color888(237,28,35));
+  matrix.drawPixel(N2.PosX, N2.PosY, matrix.Color888(237,28,35));
+  matrix.drawPixel(N2.PosX, N2.PosY, matrix.Color888(237,28,35));
+
+  matrix.drawPixel(N2.PosX, N2.PosY, matrix.Color888(237,28,35));
+}
+
+void NoteSpriteDown(){
+
+  matrix.drawPixel(N3.PosX, N3.PosY, matrix.Color888(237,28,35));
+
+  matrix.drawPixel(N3.PosX, N3.PosY, matrix.Color888(237,28,35));
+
+  matrix.drawPixel(N3.PosX, N3.PosY, matrix.Color888(237,28,35));
+  matrix.drawPixel(N3.PosX, N3.PosY, matrix.Color888(237,28,35));
+  matrix.drawPixel(N3.PosX, N3.PosY, matrix.Color888(237,28,35));
+  matrix.drawPixel(N3.PosX, N3.PosY, matrix.Color888(237,28,35));
+  matrix.drawPixel(N3.PosX, N3.PosY, matrix.Color888(237,28,35));
+
+  matrix.drawPixel(N3.PosX, N3.PosY, matrix.Color888(237,28,35));
+
+  matrix.drawPixel(N3.PosX, N3.PosY, matrix.Color888(237,28,35));
+}
+
+void RenderNote(){
+  switch (NoteType)
+  {
+  case 1:
+    NoteSpriteUp();
+    break;
+  
+  case 2:
+    NoteSpriteLeft();
+    break;
+  
+  case 3:
+    NoteSpriteDown();
+    break;
+  }
+  
+}
+
+void rythmRun();
+
+void rythmNoteMovement();
+
+void rythmHit();
+
+void rythmLose();
