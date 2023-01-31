@@ -1840,6 +1840,11 @@ if(waitCounter == 0){
 //------------------------------------------------------------------------------------------------------------------
 
 int NoteType = 0;
+int waitCounter = 0;
+int rythmScore = 0;
+int statSelect = 0;
+int rythmRegen = 0;
+int rythmHealth =0;
 
 struct Note{
   int PosX;
@@ -1852,6 +1857,12 @@ struct Note N2;
 struct Note N3;
 
 void rythmSetup(){
+  rythmScore = 0;
+  statSelect = 0;
+  noSpam = 0;
+  rythmRegen = 0;
+  rythmHealth = 3;
+  
   N1.PosX = 15;
   N1.PosY = 0;
   N1.NoteT = 1;
@@ -1885,66 +1896,63 @@ void rythmRender(){
 
 void NoteSpriteUp(){
 
-  matrix.drawPixel(N1.PosX, N1.PosY, matrix.Color888(237,28,35));
+  matrix.drawPixel(N1.PosX, N1.PosY-3, matrix.Color888(237,28,35));
 
-  matrix.drawPixel(N1.PosX, N1.PosY, matrix.Color888(237,28,35));
+  matrix.drawPixel(N1.PosX+1, N1.PosY-2, matrix.Color888(237,28,35));
 
-  matrix.drawPixel(N1.PosX, N1.PosY, matrix.Color888(237,28,35));
-  matrix.drawPixel(N1.PosX, N1.PosY, matrix.Color888(237,28,35));
-  matrix.drawPixel(N1.PosX, N1.PosY, matrix.Color888(237,28,35));
-  matrix.drawPixel(N1.PosX, N1.PosY, matrix.Color888(237,28,35));
-  matrix.drawPixel(N1.PosX, N1.PosY, matrix.Color888(237,28,35));
+  matrix.drawPixel(N1.PosX+2, N1.PosY, matrix.Color888(237,28,35));
+  matrix.drawPixel(N1.PosX+2, N1.PosY-1, matrix.Color888(237,28,35));
+  matrix.drawPixel(N1.PosX+2, N1.PosY-2, matrix.Color888(237,28,35));
+  matrix.drawPixel(N1.PosX+2, N1.PosY-3, matrix.Color888(237,28,35));
+  matrix.drawPixel(N1.PosX+2, N1.PosY-4, matrix.Color888(237,28,35));
 
-  matrix.drawPixel(N1.PosX, N1.PosY, matrix.Color888(237,28,35));
+  matrix.drawPixel(N1.PosX+3, N1.PosY-2, matrix.Color888(237,28,35));
 
-  matrix.drawPixel(N1.PosX, N1.PosY, matrix.Color888(237,28,35));
+  matrix.drawPixel(N1.PosX+4, N1.PosY-3, matrix.Color888(237,28,35));
 }
 
-void NoteSpriteLeft(){
+void NoteSpriteRight(){
 
-  matrix.drawPixel(N2.PosX, N2.PosY, matrix.Color888(237,28,35));
+  matrix.drawPixel(N2.PosX, N2.PosY-2, matrix.Color888(237,28,35));
 
-  matrix.drawPixel(N2.PosX, N2.PosY, matrix.Color888(237,28,35));
+  matrix.drawPixel(N2.PosX+1, N2.PosY-2, matrix.Color888(237,28,35));
 
-  matrix.drawPixel(N2.PosX, N2.PosY, matrix.Color888(237,28,35));
-  matrix.drawPixel(N2.PosX, N2.PosY, matrix.Color888(237,28,35));
-  matrix.drawPixel(N2.PosX, N2.PosY, matrix.Color888(237,28,35));
+  matrix.drawPixel(N2.PosX+2, N2.PosY-1, matrix.Color888(237,28,35));
+  matrix.drawPixel(N2.PosX+2, N2.PosY-2, matrix.Color888(237,28,35));
+  matrix.drawPixel(N2.PosX+2, N2.PosY-3, matrix.Color888(237,28,35));
 
-  matrix.drawPixel(N2.PosX, N2.PosY, matrix.Color888(237,28,35));
-  matrix.drawPixel(N2.PosX, N2.PosY, matrix.Color888(237,28,35));
-  matrix.drawPixel(N2.PosX, N2.PosY, matrix.Color888(237,28,35));
+  matrix.drawPixel(N2.PosX+3, N2.PosY, matrix.Color888(237,28,35));
+  matrix.drawPixel(N2.PosX+3, N2.PosY-2, matrix.Color888(237,28,35));
+  matrix.drawPixel(N2.PosX+3, N2.PosY-4, matrix.Color888(237,28,35));
 
-  matrix.drawPixel(N2.PosX, N2.PosY, matrix.Color888(237,28,35));
+  matrix.drawPixel(N2.PosX+4, N2.PosY-2, matrix.Color888(237,28,35));
 }
 
 void NoteSpriteDown(){
 
-  matrix.drawPixel(N3.PosX, N3.PosY, matrix.Color888(237,28,35));
+  matrix.drawPixel(N3.PosX, N3.PosY-2, matrix.Color888(237,28,35));
 
-  matrix.drawPixel(N3.PosX, N3.PosY, matrix.Color888(237,28,35));
+  matrix.drawPixel(N3.PosX+1, N3.PosY-3, matrix.Color888(237,28,35));
 
-  matrix.drawPixel(N3.PosX, N3.PosY, matrix.Color888(237,28,35));
-  matrix.drawPixel(N3.PosX, N3.PosY, matrix.Color888(237,28,35));
-  matrix.drawPixel(N3.PosX, N3.PosY, matrix.Color888(237,28,35));
-  matrix.drawPixel(N3.PosX, N3.PosY, matrix.Color888(237,28,35));
-  matrix.drawPixel(N3.PosX, N3.PosY, matrix.Color888(237,28,35));
+  matrix.drawPixel(N3.PosX+2, N3.PosY, matrix.Color888(237,28,35));
+  matrix.drawPixel(N3.PosX+2, N3.PosY-1, matrix.Color888(237,28,35));
+  matrix.drawPixel(N3.PosX+2, N3.PosY-2, matrix.Color888(237,28,35));
+  matrix.drawPixel(N3.PosX+2, N3.PosY-3, matrix.Color888(237,28,35));
+  matrix.drawPixel(N3.PosX+2, N3.PosY-4, matrix.Color888(237,28,35));
 
-  matrix.drawPixel(N3.PosX, N3.PosY, matrix.Color888(237,28,35));
+  matrix.drawPixel(N3.PosX+3, N3.PosY-3, matrix.Color888(237,28,35));
 
-  matrix.drawPixel(N3.PosX, N3.PosY, matrix.Color888(237,28,35));
+  matrix.drawPixel(N3.PosX+4, N3.PosY-2, matrix.Color888(237,28,35));
 }
 
 void RenderNote(){
-  switch (NoteType)
-  {
+  switch (NoteType){
   case 1:
     NoteSpriteUp();
     break;
-  
   case 2:
-    NoteSpriteLeft();
+    NoteSpriteRight();
     break;
-  
   case 3:
     NoteSpriteDown();
     break;
@@ -1956,6 +1964,68 @@ void rythmRun();
 
 void rythmNoteMovement();
 
-void rythmHit();
+void rythmHit(int posX){
+  if(posX == 2){
+    rythmScore++;
+    rythmScore++;
+  }else if (posX >= 0 && posX <=5){
+    rythmScore++;
+  }
+  
+}
+void rythmMiss(){
+  if(noSpam2 == 0){
+    rythmHealth--;
+  }
+  if(rythmHealth == 0){
+      waitCounter = -1;
+      gameState = 8;
+      noSpam = 0;
+      if(actionPressed == 1){ // make sure the end screen is not skipped
+        noSpam = 1;
+      }
+  }
+}
 
-void rythmLose();
+void rythmLose(){
+  if(waitCounter == 0){
+    if(statSelect == 0){
+      clearScreen();
+      matrix.setCursor(1, 0);  // start at top left, with one pixel of spacing
+      matrix.setTextSize(1);
+      matrix.setTextColor(matrix.Color888(143, 86, 59));
+      matrix.print("Score");
+      matrix.setTextColor(matrix.Color333(7,7,7));
+      matrix.setCursor(1, 8);
+      matrix.print(rythmScore);
+      if(noSpam == 0){
+        if(actionPressed == 1){
+          statSelect = 1;
+        }
+      }
+      if(actionPressed == 0){
+        noSpam = 0;
+      }
+    }
+    if (statSelect == 1){
+      clearScreen();
+      matrix.setCursor(1, 0);  // start at top left, with one pixel of spacing
+      matrix.setTextSize(1);
+      matrix.setTextColor(matrix.Color888(143, 86, 59));
+      matrix.print("Score");
+      matrix.setTextColor(matrix.Color333(7,7,7));
+      matrix.setCursor(1, 8);
+      matrix.print(rythmScore);
+      waitCounter++;
+    }
+  }
+  if(noSpam == 0){
+    if(actionPressed == 1){
+      gameState = 0;
+    }
+  }
+  if(actionPressed == 0){
+    noSpam = 0;
+  }
+}
+
