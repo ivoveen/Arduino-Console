@@ -1874,6 +1874,7 @@ int statSelect = 0;
 int rythmRegen = 0;
 int rythmHealth = 3;
 int rythmSpeed = GAMESPEED;
+int NoteAmount = 0;
 
 struct Note{
   int PosX;
@@ -1892,6 +1893,7 @@ void rythmSetup(){
   rythmRegen = 0;
   rythmHealth = 3;
   waitCounter = 0;
+  NoteAmount = 0;
   
   N1.PosX = 15;
   N1.PosY = 0;
@@ -1924,74 +1926,121 @@ void rythmRender(){
   matrix.drawLine(5,14,31,14,matrix.Color888(70,70,70));
 }
 
-void NoteSpriteUp(){
+void NoteSpriteUp(int PosX){
 
-  matrix.drawPixel(N1.PosX, N1.PosY-3, matrix.Color888(237,28,35));
+  matrix.drawPixel(PosX, N1.PosY-3, matrix.Color888(237,28,35));
 
-  matrix.drawPixel(N1.PosX+1, N1.PosY-2, matrix.Color888(237,28,35));
+  matrix.drawPixel(PosX+1, N1.PosY-2, matrix.Color888(237,28,35));
 
-  matrix.drawPixel(N1.PosX+2, N1.PosY, matrix.Color888(237,28,35));
-  matrix.drawPixel(N1.PosX+2, N1.PosY-1, matrix.Color888(237,28,35));
-  matrix.drawPixel(N1.PosX+2, N1.PosY-2, matrix.Color888(237,28,35));
-  matrix.drawPixel(N1.PosX+2, N1.PosY-3, matrix.Color888(237,28,35));
-  matrix.drawPixel(N1.PosX+2, N1.PosY-4, matrix.Color888(237,28,35));
+  matrix.drawPixel(PosX+2, N1.PosY, matrix.Color888(237,28,35));
+  matrix.drawPixel(PosX+2, N1.PosY-1, matrix.Color888(237,28,35));
+  matrix.drawPixel(PosX+2, N1.PosY-2, matrix.Color888(237,28,35));
+  matrix.drawPixel(PosX+2, N1.PosY-3, matrix.Color888(237,28,35));
+  matrix.drawPixel(PosX+2, N1.PosY-4, matrix.Color888(237,28,35));
 
-  matrix.drawPixel(N1.PosX+3, N1.PosY-2, matrix.Color888(237,28,35));
+  matrix.drawPixel(PosX+3, N1.PosY-2, matrix.Color888(237,28,35));
 
-  matrix.drawPixel(N1.PosX+4, N1.PosY-3, matrix.Color888(237,28,35));
+  matrix.drawPixel(PosX+4, N1.PosY-3, matrix.Color888(237,28,35));
 }
 
-void NoteSpriteRight(){
+void NoteSpriteRight(int PosX){
 
-  matrix.drawPixel(N2.PosX, N2.PosY-2, matrix.Color888(237,28,35));
+  matrix.drawPixel(PosX, N2.PosY-2, matrix.Color888(237,28,35));
 
-  matrix.drawPixel(N2.PosX+1, N2.PosY-2, matrix.Color888(237,28,35));
+  matrix.drawPixel(PosX+1, N2.PosY-2, matrix.Color888(237,28,35));
 
-  matrix.drawPixel(N2.PosX+2, N2.PosY-1, matrix.Color888(237,28,35));
-  matrix.drawPixel(N2.PosX+2, N2.PosY-2, matrix.Color888(237,28,35));
-  matrix.drawPixel(N2.PosX+2, N2.PosY-3, matrix.Color888(237,28,35));
+  matrix.drawPixel(PosX+2, N2.PosY-1, matrix.Color888(237,28,35));
+  matrix.drawPixel(PosX+2, N2.PosY-2, matrix.Color888(237,28,35));
+  matrix.drawPixel(PosX+2, N2.PosY-3, matrix.Color888(237,28,35));
 
-  matrix.drawPixel(N2.PosX+3, N2.PosY, matrix.Color888(237,28,35));
-  matrix.drawPixel(N2.PosX+3, N2.PosY-2, matrix.Color888(237,28,35));
-  matrix.drawPixel(N2.PosX+3, N2.PosY-4, matrix.Color888(237,28,35));
+  matrix.drawPixel(PosX+3, N2.PosY, matrix.Color888(237,28,35));
+  matrix.drawPixel(PosX+3, N2.PosY-2, matrix.Color888(237,28,35));
+  matrix.drawPixel(PosX+3, N2.PosY-4, matrix.Color888(237,28,35));
 
-  matrix.drawPixel(N2.PosX+4, N2.PosY-2, matrix.Color888(237,28,35));
+  matrix.drawPixel(PosX+4, N2.PosY-2, matrix.Color888(237,28,35));
 }
 
-void NoteSpriteDown(){
+void NoteSpriteDown(int PosX){
 
-  matrix.drawPixel(N3.PosX, N3.PosY-2, matrix.Color888(237,28,35));
+  matrix.drawPixel(PosX, N3.PosY-2, matrix.Color888(237,28,35));
 
-  matrix.drawPixel(N3.PosX+1, N3.PosY-3, matrix.Color888(237,28,35));
+  matrix.drawPixel(PosX+1, N3.PosY-3, matrix.Color888(237,28,35));
 
-  matrix.drawPixel(N3.PosX+2, N3.PosY, matrix.Color888(237,28,35));
-  matrix.drawPixel(N3.PosX+2, N3.PosY-1, matrix.Color888(237,28,35));
-  matrix.drawPixel(N3.PosX+2, N3.PosY-2, matrix.Color888(237,28,35));
-  matrix.drawPixel(N3.PosX+2, N3.PosY-3, matrix.Color888(237,28,35));
-  matrix.drawPixel(N3.PosX+2, N3.PosY-4, matrix.Color888(237,28,35));
+  matrix.drawPixel(PosX+2, N3.PosY, matrix.Color888(237,28,35));
+  matrix.drawPixel(PosX+2, N3.PosY-1, matrix.Color888(237,28,35));
+  matrix.drawPixel(PosX+2, N3.PosY-2, matrix.Color888(237,28,35));
+  matrix.drawPixel(PosX+2, N3.PosY-3, matrix.Color888(237,28,35));
+  matrix.drawPixel(PosX+2, N3.PosY-4, matrix.Color888(237,28,35));
 
-  matrix.drawPixel(N3.PosX+3, N3.PosY-3, matrix.Color888(237,28,35));
+  matrix.drawPixel(PosX+3, N3.PosY-3, matrix.Color888(237,28,35));
 
-  matrix.drawPixel(N3.PosX+4, N3.PosY-2, matrix.Color888(237,28,35));
+  matrix.drawPixel(PosX+4, N3.PosY-2, matrix.Color888(237,28,35));
 }
 
-void RenderNote(){
+void rythmNoteSpawn(){
+  NoteType = rand()%3+1;
+  NoteAmount++;
+  switch (NoteType){ 
+   case 1: 
+      while (NoteType == 1){
+        RenderNote(NoteType);
+        N1.PosX--;
+      }
+      break;
+   case 2: 
+      while (NoteType == 2){
+        RenderNote(NoteType);
+        N2.PosX--;
+      }
+      break; 
+   case 3: 
+      while (NoteType == 3){
+        RenderNote(NoteType);
+        N3.PosX--;
+      }
+      break;
+  }
+}
+
+void RenderNote(int NoteType){
   switch (NoteType){
   case 1:
-    NoteSpriteUp();
+    NoteSpriteUp(N1.PosX);
     break;
   case 2:
-    NoteSpriteRight();
+    NoteSpriteRight(N2.PosX);
     break;
   case 3:
-    NoteSpriteDown();
+    NoteSpriteDown(N3.PosX);
     break;
   }
   
 }
 
 void rythmNoteMovement(){
+  for(int i = 0; i < NoteAmount; i++){
+    switch (N1.NoteT, N2.NoteT, N3.NoteT){
+    case 1:
+      N1.PosX--;
+      break;
+    case 2:
+      N2.PosX--;
+      break;
+    case 3:
+      N3.PosX--;
+      break;
+    }
+  }
+}
 
+void rythmHit(int posX){
+  if(posX == 2){
+    rythmScore++;
+    rythmScore++;
+  }else if (posX >= 0 && posX <=5){
+    rythmScore++;
+  }
+  
 }
 
 void rythmRun(){
@@ -2005,21 +2054,22 @@ void rythmRun(){
     
       //and remove dino face if it was ducking previously
       for(int i = 7; i < 9; i++){
-          for(int j = 0; j < 6; j++){
-            matrix.drawPixel(i + 1, dinoYpos - j, matrix.Color333(0, 0, 0));
-          }
+        for(int j = 0; j < 6; j++){
+          matrix.drawPixel(i + 1, dinoYpos - j, matrix.Color333(0, 0, 0));
         }
+      }
     }
-    dinoState = 2;
+    
   }
   else if(joystickDirection == 2){
-    if(N2.PosX==2){
-
+    if(N2.PosX <=4 && N2.PosX >=0){
+      rythmHit(N2.PosX);
     }
-  }else if(joystickDirection == 3){ 
-    //dino is running
-    dinoState = 1;
-    duckBool = 0;
+  }
+  else if(joystickDirection == 3){ 
+    if(N3.PosX <=4 && N3.PosX >=0){
+      rythmHit(N3.PosX);
+    }
   }
 
   if(waitCounter == dinoRunSpeed){
@@ -2032,16 +2082,6 @@ void rythmRun(){
     rythmNoteMovement();
   }
   waitCounter++;
-}
-
-void rythmHit(int posX){
-  if(posX == 2){
-    rythmScore++;
-    rythmScore++;
-  }else if (posX >= 0 && posX <=5){
-    rythmScore++;
-  }
-  
 }
 
 void rythmMiss(){
