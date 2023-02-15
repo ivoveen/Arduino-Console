@@ -1868,51 +1868,51 @@ if(waitCounter == 0){
 // Rythm code
 //------------------------------------------------------------------------------------------------------------------
 
-int NoteType = 0;
+
 int rythmScore = 0;
 int statSelect = 0;
+int rythmCombo = 0;
+int rythmComboTemp = 0;
+int levelUp = 0;
 int rythmRegen = 0;
 int rythmHealth = 3;
-int rythmSpeed = GAMESPEED;
-int NoteAmount = 0;
-
-struct Note{
-  int PosX;
-  int PosY;
-  int NoteT;
-};
-
-struct Note N1;
-struct Note N2;
-struct Note N3;
+int rythmRunSpeed = 200;
+int Notes[6][2] = {{99,0}, {99,0}, {99,0}, {99,0}, {99,0}, {99,0}};
+int NoteCounter = 0;
+int Delay = 0;
+int level = 0;
 
 void rythmSetup(){
   rythmScore = 0;
   statSelect = 0;
   noSpam = 0;
+  rythmCombo = 0;
+  rythmComboTemp = 0;
+  levelUp = 0;
   rythmRegen = 0;
   rythmHealth = 3;
   waitCounter = 0;
-  NoteAmount = 0;
-  
-  N1.PosX = 15;
-  N1.PosY = 0;
-  N1.NoteT = 1;
+  NoteCounter = 0;
+  Delay = 0;
+  level = 0;
+  rythmRunSpeed = 200;
 
-  N2.PosX = 15;
-  N2.PosY = 5;
-  N2.NoteT = 2;
-
-  N3.PosX = 15;
-  N3.PosY = 10;
-  N3.NoteT = 3;
-
+  for(int i = 0; i < 6; i++){
+    Notes[i][0] = 99;
+    Notes[i][1] = -1;
+  }
 
   clearScreen();
   rythmRender();
+  rythmNoteSpawn(0);
+  rythmRun();
 }
 
 void rythmRender(){
+  matrix.fillRect(5,0,40,4,matrix.Color888(0,0,0));
+  matrix.fillRect(5,5,40,4,matrix.Color888(0,0,0));
+  matrix.fillRect(5,10,40,4,matrix.Color888(0,0,0));
+  
   matrix.fillRect(0,0,5,5,matrix.Color888(255,0,0));
   matrix.fillRect(0,5,5,5,matrix.Color888(0,255,0));
   matrix.fillRect(0,10,5,5,matrix.Color888(0, 0, 255));
@@ -1926,176 +1926,263 @@ void rythmRender(){
   matrix.drawLine(5,14,31,14,matrix.Color888(70,70,70));
 }
 
-void NoteSpriteUp(int PosX){
+void NoteSpriteUp(int PosX, int PosY){
+//erase
+  matrix.drawPixel(PosX+1, PosY+2, matrix.Color888(0,0,0));
 
-  matrix.drawPixel(PosX, N1.PosY-3, matrix.Color888(237,28,35));
+  matrix.drawPixel(PosX+2, PosY+1, matrix.Color888(0,0,0));
 
-  matrix.drawPixel(PosX+1, N1.PosY-2, matrix.Color888(237,28,35));
+  matrix.drawPixel(PosX+3, PosY, matrix.Color888(0,0,0));
+  matrix.drawPixel(PosX+3, PosY+1, matrix.Color888(0,0,0));
+  matrix.drawPixel(PosX+3, PosY+2, matrix.Color888(0,0,0));
+  matrix.drawPixel(PosX+3, PosY+3, matrix.Color888(0,0,0));
+  matrix.drawPixel(PosX+3, PosY+4, matrix.Color888(70,70,70));
 
-  matrix.drawPixel(PosX+2, N1.PosY, matrix.Color888(237,28,35));
-  matrix.drawPixel(PosX+2, N1.PosY-1, matrix.Color888(237,28,35));
-  matrix.drawPixel(PosX+2, N1.PosY-2, matrix.Color888(237,28,35));
-  matrix.drawPixel(PosX+2, N1.PosY-3, matrix.Color888(237,28,35));
-  matrix.drawPixel(PosX+2, N1.PosY-4, matrix.Color888(237,28,35));
+  matrix.drawPixel(PosX+4, PosY+1, matrix.Color888(0,0,0));
 
-  matrix.drawPixel(PosX+3, N1.PosY-2, matrix.Color888(237,28,35));
-
-  matrix.drawPixel(PosX+4, N1.PosY-3, matrix.Color888(237,28,35));
-}
-
-void NoteSpriteRight(int PosX){
-
-  matrix.drawPixel(PosX, N2.PosY-2, matrix.Color888(237,28,35));
-
-  matrix.drawPixel(PosX+1, N2.PosY-2, matrix.Color888(237,28,35));
-
-  matrix.drawPixel(PosX+2, N2.PosY-1, matrix.Color888(237,28,35));
-  matrix.drawPixel(PosX+2, N2.PosY-2, matrix.Color888(237,28,35));
-  matrix.drawPixel(PosX+2, N2.PosY-3, matrix.Color888(237,28,35));
-
-  matrix.drawPixel(PosX+3, N2.PosY, matrix.Color888(237,28,35));
-  matrix.drawPixel(PosX+3, N2.PosY-2, matrix.Color888(237,28,35));
-  matrix.drawPixel(PosX+3, N2.PosY-4, matrix.Color888(237,28,35));
-
-  matrix.drawPixel(PosX+4, N2.PosY-2, matrix.Color888(237,28,35));
-}
-
-void NoteSpriteDown(int PosX){
-
-  matrix.drawPixel(PosX, N3.PosY-2, matrix.Color888(237,28,35));
-
-  matrix.drawPixel(PosX+1, N3.PosY-3, matrix.Color888(237,28,35));
-
-  matrix.drawPixel(PosX+2, N3.PosY, matrix.Color888(237,28,35));
-  matrix.drawPixel(PosX+2, N3.PosY-1, matrix.Color888(237,28,35));
-  matrix.drawPixel(PosX+2, N3.PosY-2, matrix.Color888(237,28,35));
-  matrix.drawPixel(PosX+2, N3.PosY-3, matrix.Color888(237,28,35));
-  matrix.drawPixel(PosX+2, N3.PosY-4, matrix.Color888(237,28,35));
-
-  matrix.drawPixel(PosX+3, N3.PosY-3, matrix.Color888(237,28,35));
-
-  matrix.drawPixel(PosX+4, N3.PosY-2, matrix.Color888(237,28,35));
-}
-
-void rythmNoteSpawn(){
-  NoteType = rand()%3+1;
-  NoteAmount++;
-  switch (NoteType){ 
-   case 1: 
-      while (NoteType == 1){
-        RenderNote(NoteType);
-        N1.PosX--;
-      }
-      break;
-   case 2: 
-      while (NoteType == 2){
-        RenderNote(NoteType);
-        N2.PosX--;
-      }
-      break; 
-   case 3: 
-      while (NoteType == 3){
-        RenderNote(NoteType);
-        N3.PosX--;
-      }
-      break;
+  matrix.drawPixel(PosX+5, PosY+2, matrix.Color888(0,0,0));
+ 
+  if(PosX < 4){
+    matrix.fillRect(0,0,5,5,matrix.Color888(255,0,0));
+    matrix.drawLine(2,0,2,14,matrix.Color888(255,255,255));
   }
+
+//draw
+  matrix.drawPixel(PosX, PosY+2, matrix.Color888(237,28,35));
+
+  matrix.drawPixel(PosX+1, PosY+1, matrix.Color888(237,28,35));
+
+  matrix.drawPixel(PosX+2, PosY, matrix.Color888(237,28,35));
+  matrix.drawPixel(PosX+2, PosY+1, matrix.Color888(237,28,35));
+  matrix.drawPixel(PosX+2, PosY+2, matrix.Color888(237,28,35));
+  matrix.drawPixel(PosX+2, PosY+3, matrix.Color888(237,28,35));
+  matrix.drawPixel(PosX+2, PosY+4, matrix.Color888(237,28,35));
+
+  matrix.drawPixel(PosX+3, PosY+1, matrix.Color888(237,28,35));
+
+  matrix.drawPixel(PosX+4, PosY+2, matrix.Color888(237,28,35));
 }
 
-void RenderNote(int NoteType){
-  switch (NoteType){
-  case 1:
-    NoteSpriteUp(N1.PosX);
-    break;
-  case 2:
-    NoteSpriteRight(N2.PosX);
-    break;
-  case 3:
-    NoteSpriteDown(N3.PosX);
-    break;
+void NoteSpriteRight(int PosX, int PosY){
+//erase
+  matrix.drawPixel(PosX+1, PosY+2, matrix.Color888(0,0,0));
+
+  matrix.drawPixel(PosX+2, PosY+2, matrix.Color888(0,0,0));
+
+  matrix.drawPixel(PosX+3, PosY, matrix.Color888(0,0,0));
+  matrix.drawPixel(PosX+3, PosY+2, matrix.Color888(0,0,0));
+  matrix.drawPixel(PosX+3, PosY+4, matrix.Color888(70,70,70));
+
+  matrix.drawPixel(PosX+4, PosY+1, matrix.Color888(0,0,0));
+  matrix.drawPixel(PosX+4, PosY+2, matrix.Color888(0,0,0));
+  matrix.drawPixel(PosX+4, PosY+3, matrix.Color888(0,0,0));
+
+  matrix.drawPixel(PosX+5, PosY+2, matrix.Color888(0,0,0));
+
+  if(PosX < 4){
+    matrix.fillRect(0,5,5,5,matrix.Color888(0,255,0));
+    matrix.drawLine(2,0,2,14,matrix.Color888(255,255,255));
   }
-  
+
+//draw
+  matrix.drawPixel(PosX, PosY+2, matrix.Color888(28,237,35));
+
+  matrix.drawPixel(PosX+1, PosY+2, matrix.Color888(28,237,35));
+
+  matrix.drawPixel(PosX+2, PosY, matrix.Color888(28,237,35));
+  matrix.drawPixel(PosX+2, PosY+2, matrix.Color888(28,237,35));
+  matrix.drawPixel(PosX+2, PosY+4, matrix.Color888(28,237,35));
+
+  matrix.drawPixel(PosX+3, PosY+1, matrix.Color888(28,237,35));
+  matrix.drawPixel(PosX+3, PosY+2, matrix.Color888(28,237,35));
+  matrix.drawPixel(PosX+3, PosY+3, matrix.Color888(28,237,35));
+
+  matrix.drawPixel(PosX+4, PosY+2, matrix.Color888(28,237,35));
+}
+
+void NoteSpriteDown(int PosX, int PosY){
+//erase
+  matrix.drawPixel(PosX+1, PosY+2, matrix.Color888(0,0,0));
+
+  matrix.drawPixel(PosX+2, PosY+3, matrix.Color888(0,0,0));
+
+  matrix.drawPixel(PosX+3, PosY, matrix.Color888(0,0,0));
+  matrix.drawPixel(PosX+3, PosY+1, matrix.Color888(0,0,0));
+  matrix.drawPixel(PosX+3, PosY+2, matrix.Color888(0,0,0));
+  matrix.drawPixel(PosX+3, PosY+3, matrix.Color888(0,0,0));
+  matrix.drawPixel(PosX+3, PosY+4, matrix.Color888(70,70,70));
+
+  matrix.drawPixel(PosX+4, PosY+3, matrix.Color888(0,0,0));
+
+  matrix.drawPixel(PosX+5, PosY+2, matrix.Color888(0,0,0));
+
+  if(PosX < 4){
+    matrix.fillRect(0,10,5,5,matrix.Color888(0, 0, 255));
+    matrix.drawLine(2,0,2,14,matrix.Color888(255,255,255));
+  }
+
+//draw
+  matrix.drawPixel(PosX, PosY+2, matrix.Color888(35,28,237));
+
+  matrix.drawPixel(PosX+1, PosY+3, matrix.Color888(35,28,237));
+
+  matrix.drawPixel(PosX+2, PosY, matrix.Color888(35,28,237));
+  matrix.drawPixel(PosX+2, PosY+1, matrix.Color888(35,28,237));
+  matrix.drawPixel(PosX+2, PosY+2, matrix.Color888(35,28,237));
+  matrix.drawPixel(PosX+2, PosY+3, matrix.Color888(35,28,237));
+  matrix.drawPixel(PosX+2, PosY+4, matrix.Color888(35,28,237));
+
+  matrix.drawPixel(PosX+3, PosY+3, matrix.Color888(35,28,237));
+
+  matrix.drawPixel(PosX+4, PosY+2, matrix.Color888(35,28,237));
+}
+
+void rythmNoteSpawn(int Delay){
+  int j = 0;
+  if(NoteCounter < 6){
+    j= rand()%3+1;
+    if(Notes[NoteCounter][0]==99){
+      switch (j){
+        case 1:
+          Notes[NoteCounter][0] = 34+rand()%10+Delay;
+          Notes[NoteCounter][1] = 0;
+        break;
+        case 2:
+          Notes[NoteCounter][0] = 34+rand()%10+Delay;
+          Notes[NoteCounter][1] = 5;
+        break;
+        case 3:
+          Notes[NoteCounter][0] = 34+rand()%10+Delay;
+          Notes[NoteCounter][1] = 10;
+        break;
+      }
+    }
+  }else if (NoteCounter >= 6){
+    NoteCounter = 0;
+    rythmNoteSpawn(0);
+  }
+  NoteCounter++;
+}
+
+void RenderNote(int i){
+  if(Notes[i][1]==0){
+    NoteSpriteUp(Notes[i][0], Notes[i][1]);
+  }else if (Notes[i][1]==5){
+    NoteSpriteRight(Notes[i][0], Notes[i][1]);
+  }else if (Notes[i][1]==10){
+    NoteSpriteDown(Notes[i][0], Notes[i][1]);
+  }
 }
 
 void rythmNoteMovement(){
-  for(int i = 0; i < NoteAmount; i++){
-    switch (N1.NoteT, N2.NoteT, N3.NoteT){
-    case 1:
-      N1.PosX--;
-      break;
-    case 2:
-      N2.PosX--;
-      break;
-    case 3:
-      N3.PosX--;
-      break;
+  for(int i = 0; i < 6; i++){
+    if (Notes[i][0]!=99 && Notes[i][1]!=-1){
+      Notes[i][0]--;
+      RenderNote(i);
+      if (Notes[i][0] < -4){
+        rythmMiss(i);
+      }
     }
   }
 }
 
-void rythmHit(int posX){
-  if(posX == 2){
-    rythmScore++;
-    rythmScore++;
-  }else if (posX >= 0 && posX <=5){
-    rythmScore++;
+void rythmComboHit(int noSpam3){
+  if (noSpam3 == 0){
+    rythmComboTemp++;
   }
-  
+  if (noSpam3 == 1){
+    if (rythmCombo < rythmComboTemp){
+      rythmCombo = rythmComboTemp;
+    }
+    rythmComboTemp = 0;
+    noSpam3 = 0;
+  }
+}
+
+void rythmHit(){
+  for (int i = 0; i < 6; i++){
+    if (Notes[i][0] != 99){
+      if (Notes[i][0] >= -4 && Notes[i][0] <=4){
+        rythmScore++;
+        if (rythmRunSpeed-5 > 90){
+          rythmRunSpeed = rythmRunSpeed-5;
+        }
+        if(Notes[i][0] == 0){
+          rythmScore++;
+        }
+        Notes[i][0] = 99;
+        Notes[i][1] = -1;
+        rythmComboHit(0);
+        rythmRender();
+        rythmNoteSpawn(0);
+        if (rythmScore >= 10 && level == 0){
+          levelUp = 1;
+          level = 1;
+          Delay = 10;
+        }
+        if (rythmScore == 25 && level == 1){
+          levelUp = 1;
+          level = 2;
+          Delay = 25;
+        }
+        if (levelUp == 1){
+          levelUp = 0;
+          rythmNoteSpawn(Delay);
+        }
+      }
+    }
+  }
 }
 
 void rythmRun(){
   //handle inputs
-  if(joystickDirection == 1){
-    
-    //dino is jumping
-    if(jumpBool == 0){ //making sure you cant spam jump in the air
-    
-      jumpBool = 1;      
-    
-      //and remove dino face if it was ducking previously
-      for(int i = 7; i < 9; i++){
-        for(int j = 0; j < 6; j++){
-          matrix.drawPixel(i + 1, dinoYpos - j, matrix.Color333(0, 0, 0));
-        }
+  if(joystickDirection == 3 && actionPressed == 1){
+    for(int i = 0; i < 6; i++){
+      if(Notes[i][1] == 0){
+        rythmHit();
       }
     }
-    
-  }
-  else if(joystickDirection == 2){
-    if(N2.PosX <=4 && N2.PosX >=0){
-      rythmHit(N2.PosX);
+  }else if(joystickDirection == 2 && actionPressed == 1){
+     for(int i = 0; i < 6; i++){
+      if(Notes[i][1] == 5){
+        rythmHit();
+      }
+    }
+  }else if(joystickDirection == 1 && actionPressed == 1){ 
+     for(int i = 0; i < 6; i++){
+      if(Notes[i][1] == 10){
+        rythmHit();
+      }
     }
   }
-  else if(joystickDirection == 3){ 
-    if(N3.PosX <=4 && N3.PosX >=0){
-      rythmHit(N3.PosX);
-    }
-  }
-
-  if(waitCounter == dinoRunSpeed){
-    waitCounter = 0;  
-  
-    //move the dino
-    dinoRender();
-
-    //move Obstacles
+  if(waitCounter == rythmRunSpeed){
+    waitCounter = 0;
     rythmNoteMovement();
   }
   waitCounter++;
 }
 
-void rythmMiss(){
+void rythmMiss(int i){
+  Notes[i][0] = 99;
+  Notes[i][1] = -1;
+  noSpam2=0;
+  rythmComboHit(1);
+  rythmRender();
+
   if(noSpam2 == 0){
     rythmHealth--;
+    noSpam2 = 1;
   }
   if(rythmHealth == 0){
-      waitCounter = -1;
-      gameState = 8;
-      noSpam = 0;
-      if(actionPressed == 1){ // make sure the end screen is not skipped
-        noSpam = 1;
-      }
+    waitCounter = -1;
+    gameState = 8;
+    noSpam = 0;
+    if(actionPressed == 1){ // make sure the end screen is not skipped
+      noSpam = 1;
+      noSpam2 = 1;
+    }
   }
+  rythmNoteSpawn(0);
 }
 
 void rythmLose(){
@@ -2109,33 +2196,40 @@ void rythmLose(){
       matrix.setTextColor(matrix.Color333(7,7,7));
       matrix.setCursor(1, 8);
       matrix.print(rythmScore);
+      statSelect++;
+    }
+    if(statSelect == 1){
       if(noSpam == 0){
         if(actionPressed == 1){
-          statSelect = 1;
+          statSelect = 2;
+          noSpam = 1;
         }
       }
       if(actionPressed == 0){
         noSpam = 0;
       }
     }
-    if (statSelect == 1){
+    if (statSelect == 2){
       clearScreen();
       matrix.setCursor(1, 0);  // start at top left, with one pixel of spacing
       matrix.setTextSize(1);
       matrix.setTextColor(matrix.Color888(143, 86, 59));
-      matrix.print("Score");
+      matrix.print("Combo");
       matrix.setTextColor(matrix.Color333(7,7,7));
       matrix.setCursor(1, 8);
-      matrix.print(rythmScore);
+      matrix.print(rythmCombo);
       waitCounter++;
     }
   }
-  if(noSpam == 0){
-    if(actionPressed == 1){
-      gameState = 0;
+
+  if (statSelect == 2){
+    if(noSpam2 == 0){
+      if(actionPressed == 1){
+        gameState = 0;
+      }
     }
-  }
-  if(actionPressed == 0){
-    noSpam = 0;
+    if(actionPressed == 0){
+      noSpam2 = 0;
+    }
   }
 }
