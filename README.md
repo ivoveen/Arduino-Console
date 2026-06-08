@@ -1,4 +1,5 @@
 # The Arduino Console - Game Mania
+This project is was made during my final highschool year (2022-2023) and I would improve nearly every aspect of it now. However, I taught me a lot about teamwork and working for a limited system.
 
 ![arduinoConsolePromo](https://github.com/user-attachments/assets/29e7c9df-2e39-43b4-b249-d0592ccd428a)
 
